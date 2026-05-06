@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fichaje Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARIABLES ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0e0e0e;
+  --surface:   #161616;
+  --card:      #1c1c1c;
+  --border:    #2a2a2a;
+  --accent:    #c8ff00;
+  --accent2:   #ff6b35;
+  --text:      #e8e8e8;
+  --muted:     #666;
+  --green:     #4ade80;
+  --red:       #f87171;
+  --yellow:    #fbbf24;
+  --blue:      #60a5fa;
+  --font-mono: 'DM Mono', monospace;
+  --font-head: 'Syne', sans-serif;
+}
+
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN OVERLAY ─────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
+
+/* ── HEADER ────────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.logo-dot {
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.clock {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+/* ── NAV TABS ──────────────────────────────────────────────── */
+nav {
+  display: flex;
+  gap: 0;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+nav button {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0.9rem 1.4rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+nav button:hover { color: var(--text); }
+nav button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── MAIN ──────────────────────────────────────────────────── */
+main { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+/* ── PANELS ────────────────────────────────────────────────── */
+.panel { display: none; animation: fadeIn 0.3s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── CARDS ─────────────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+/* ── GRID ──────────────────────────────────────────────────── */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── STAT CARD ─────────────────────────────────────────────── */
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem;
+}
+.stat-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.stat-value {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.stat-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; }
+
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.neutral  { color: var(--accent); }
+.warn     { color: var(--yellow); }
+
+/* ── STATUS BADGE ──────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.badge-green  { color: var(--green); }
+.badge-red    { color: var(--red); }
+.badge-yellow { color: var(--yellow); }
+.badge-blue   { color: var(--blue); }
+.badge-accent { color: var(--accent); }
+.badge-muted  { color: var(--muted); }
+
+/* ── BIG STATUS (hoy) ──────────────────────────────────────── */
+.today-status {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.today-time-block { text-align: center; }
+.today-time-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.today-time-value { font-family: var(--font-head); font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+
+.divider-v { width: 1px; height: 60px; background: var(--border); }
+
+/* ── PROGRESS BAR ──────────────────────────────────────────── */
+.progress-wrap {
+  background: var(--border);
+  border-radius: 2px;
+  height: 6px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.progress-bar.over { background: var(--green); }
+.progress-bar.under { background: var(--red); }
+
+/* ── TABLE ─────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.75rem 0.75rem 0.75rem 0;
+  font-weight: 400;
+}
+td { padding: 0.65rem 0.75rem 0.65rem 0; border-bottom: 1px solid #1f1f1f; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ── BOTONES ───────────────────────────────────────────────── */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.2rem;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #deff33; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--text); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: var(--red); color: #000; }
+.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.65rem; }
+
+/* ── FORM ELEMENTS ─────────────────────────────────────────── */
+.form-group { margin-bottom: 1rem; }
+.form-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.form-input, .form-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-select option { background: var(--surface); }
+
+/* ── MODAL ─────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+  animation: fadeIn 0.2s ease;
+}
+.modal-title {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+/* ── CONFIG BANNER ─────────────────────────────────────────── */
+.config-banner {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid var(--accent2);
+  border-radius: 4px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--accent2);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── CALENDAR ──────────────────────────────────────────────── */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.cal-month {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-day-name {
+  font-size: 0.6rem;
+  text-align: center;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-bottom: 0.5rem;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  position: relative;
+  gap: 2px;
+}
+.cal-day:hover:not(.empty):not(.weekend) { border-color: var(--border); background: var(--surface); }
+.cal-day.empty { cursor: default; }
+.cal-day.weekend { color: var(--muted); cursor: default; }
+.cal-day.today { border-color: var(--accent); color: var(--accent); }
+.cal-day .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cal-day.has-fichaje .dot { background: var(--green); }
+.cal-day.has-ausencia .dot { background: var(--yellow); }
+.cal-day.vacaciones .dot { background: var(--blue); }
+.cal-day.baja .dot { background: var(--red); }
+
+/* ── TIPO AUSENCIA PILLS ───────────────────────────────────── */
+.tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.tipo-pill {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.tipo-pill:hover { border-color: var(--text); color: var(--text); }
+.tipo-pill.selected { border-color: var(--accent); color: var(--accent); background: rgba(200,255,0,0.07); }
+
+/* ── CONFIG ────────────────────────────────────────────────── */
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.config-row:last-child { border-bottom: none; }
+.config-label { font-size: 0.85rem; }
+.config-desc { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+.config-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  width: 300px;
+  max-width: 100%;
+}
+.config-input:focus { border-color: var(--accent); }
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.9rem 1.25rem;
+  font-size: 0.8rem;
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 300px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-left-color: var(--red); }
+
+/* ── SPINNER ───────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── EMPTY STATE ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+/* ── SEMANA WIDGET ─────────────────────────────────────────── */
+.semana-widget {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.semana-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.semana-title {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.semana-balance-big {
+  font-family: var(--font-head);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.semana-dias {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+.semana-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.semana-dia-nombre {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.semana-dia-bar-wrap {
+  width: 100%;
+  height: 48px;
+  background: var(--surface);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.semana-dia-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 2px;
+  transition: height 0.4s ease;
+}
+.semana-dia-bar-fill.completo  { background: var(--green); }
+.semana-dia-bar-fill.parcial   { background: var(--accent); }
+.semana-dia-bar-fill.exceso    { background: var(--green); height: 100% !important; }
+.semana-dia-bar-fill.ausencia  { background: var(--blue); }
+.semana-dia-bar-fill.vacio     { background: var(--border); height: 4px !important; }
+.semana-dia-bar-fill.hoy       { background: var(--accent); }
+.semana-dia-horas {
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+.semana-dia.es-hoy .semana-dia-nombre { color: var(--accent); }
+.semana-totales {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+.semana-progress-wrap {
+  background: var(--border);
+  border-radius: 2px;
+  height: 4px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+.semana-progress-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+  background: var(--accent);
+}
+.semana-progress-bar.over { background: var(--green); }
+.semana-progress-bar.under { background: var(--red); }
+
+/* ── SCROLLBAR ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-dot" id="statusDot"></div>
+    FICHAJE
+  </div>
+  <div class="clock" id="clock">--:--:--</div>
+</header>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav>
+  <button class="active" onclick="showPanel('hoy')">Hoy</button>
+  <button onclick="showPanel('mes')">Mes</button>
+  <button onclick="showPanel('ausencias')">Ausencias</button>
+  <button onclick="showPanel('config')">Config</button>
+</nav>
+
+<!-- ── MAIN ────────────────────────────────────────────────── -->
+<main>
+
+<!-- ╔══ PANEL: HOY ══════════════════════════════════════════╗ -->
+<div id="panel-hoy" class="panel active">
+
+  <div id="configBanner" class="config-banner" style="display:none">
+    ⚠ Configura la URL de tu Google Apps Script en la pestaña <strong>Config</strong> para empezar.
+    <button class="btn btn-ghost btn-sm" onclick="showPanel('config')">Ir a Config →</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Estado actual</div>
+    <div class="today-status">
+      <div class="today-time-block">
+        <div class="today-time-label">Entrada</div>
+        <div class="today-time-value" id="todayEntrada">--:--</div>
+      </div>
+      <div class="divider-v"></div>
+      <div class="today-time-block">
+        <div class="today-time-label">Tiempo trabajado</div>
+        <div class="today-time-value" id="todayTrabajado">0h 00m</div>
+      </div>
+      <div class="divider-v"></div>
+      <div class="today-time-block">
+        <div class="today-time-label">Jornada objetivo</div>
+        <div class="today-time-value" id="todayObjetivo">8h 15m</div>
+      </div>
+      <div class="divider-v"></div>
+      <div class="today-time-block">
+        <div class="today-time-label">Balance</div>
+        <div class="today-time-value" id="todayBalance">--</div>
+      </div>
+    </div>
+    <div style="margin-top:1.25rem;">
+      <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-bottom:0.4rem;">
+        <span>Progreso jornada</span>
+        <span id="todayPct">0%</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="todayProgress" style="width:0%"></div>
+      </div>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <span id="todayBadge" class="badge badge-muted">SIN FICHAR</span>
+      <button class="btn btn-primary" onclick="ficharManual()">
+        ⏱ Fichar ahora
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal()">Editar hoy</button>
+      <button class="btn btn-ghost btn-sm" onclick="openAddRegistroModal()">+ Registro manual</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fichajes de hoy</div>
+    <div id="fichajesHoy">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        Sin fichajes hoy
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMANA WIDGET -->
+  <div class="semana-widget">
+    <div class="semana-header">
+      <div class="semana-title">Semana actual · 40h objetivo</div>
+      <div>
+        <span style="font-size:0.7rem;color:var(--muted);margin-right:0.5rem" id="semanaHorasTxt">0h 00m / 40h</span>
+        <span class="semana-balance-big" id="semanaBalanceBig">—</span>
+      </div>
+    </div>
+    <div class="semana-dias" id="semanaDias"></div>
+    <div class="semana-progress-wrap">
+      <div class="semana-progress-bar" id="semanaProgressBar" style="width:0%"></div>
+    </div>
+    <div class="semana-totales">
+      <span id="semanaPct">0%</span>
+      <span id="semanaRestante">—</span>
+    </div>
+    <div id="semanaHoraSalida" style="margin-top:1rem;padding:0.75rem;background:var(--surface);border-radius:3px;font-size:0.8rem;display:none;">
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="stat">
+      <div class="stat-label">Este mes</div>
+      <div class="stat-value" id="mesTotal">0h</div>
+      <div class="stat-sub" id="mesBalance">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Días trabajados</div>
+      <div class="stat-value" id="diasTrabajados">0</div>
+      <div class="stat-sub" id="diasMes">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ PANEL: MES ═══════════════════════════════════════════╗ -->
+<div id="panel-mes" class="panel">
+  <div class="card">
+    <div class="cal-header">
+      <button class="btn btn-ghost btn-sm" onclick="cambiarMes(-1)">← Ant</button>
+      <div class="cal-month" id="calMonthTitle">Mayo 2025</div>
+      <button class="btn btn-ghost btn-sm" onclick="cambiarMes(1)">Sig →</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat">
+      <div class="stat-label">Horas trabajadas</div>
+      <div class="stat-value" id="mesResHoras">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Horas esperadas</div>
+      <div class="stat-value" id="mesResEsperadas">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Balance mensual</div>
+      <div class="stat-value" id="mesResBalance">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div class="card-title" style="margin:0">Detalle por día</div>
+      <button class="btn btn-ghost btn-sm" onclick="openAddRegistroModal()">+ Añadir registro</button>
+    </div>
+    <div class="table-wrap">
+      <table id="mesTable">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Día</th>
+            <th>Esperado</th>
+            <th>Trabajado</th>
+            <th>Balance</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="mesTableBody">
+          <tr><td colspan="6" class="empty-state">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ PANEL: AUSENCIAS ════════════════════════════════════╗ -->
+<div id="panel-ausencias" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <div style="font-family:var(--font-head);font-weight:700;font-size:1.25rem;">Ausencias</div>
+      <div style="font-size:0.75rem;color:var(--muted)">Teletrabajo, fuera de oficina, médico, vacaciones…</div>
+    </div>
+    <button class="btn btn-primary" onclick="openAusenciaModal()">+ Nueva ausencia</button>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Nota</th>
+            <th>Duración parcial</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ausenciasTableBody">
+          <tr><td colspan="5" class="empty-state">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ PANEL: CONFIG ════════════════════════════════════════╗ -->
+<div id="panel-config" class="panel">
+  <div style="font-family:var(--font-head);font-weight:700;font-size:1.25rem;margin-bottom:1.5rem;">Configuración</div>
+
+  <div class="card">
+    <div class="card-title">Google Apps Script</div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">URL del Web App</div>
+        <div class="config-desc">Pégala desde: Apps Script → Implementar → Gestionar implementaciones</div>
+      </div>
+      <input class="config-input" id="cfgUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Jornada laboral</div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Lunes – Jueves</div>
+        <div class="config-desc">Minutos presencia oficina Lun–Jue (trabajo + comida). Default: 555 = 9h15m</div>
+      </div>
+      <input class="config-input" id="cfgLJ" type="number" value="495" style="width:120px">
+    </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Viernes</div>
+        <div class="config-desc">Minutos presencia oficina Viernes (trabajo + comida). Default: 480 = 8h</div>
+      </div>
+      <input class="config-input" id="cfgV" type="number" value="420" style="width:120px">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Instrucciones — Atajo iOS</div>
+    <div style="font-size:0.8rem;line-height:1.8;color:var(--text);">
+      <p style="margin-bottom:1rem;">Crea un <strong>Atajo de Siri</strong> con estos pasos en la app <em>Atajos</em>:</p>
+      <ol style="padding-left:1.25rem;display:flex;flex-direction:column;gap:0.6rem;">
+        <li>Abre <strong>Atajos</strong> → <strong>+</strong> → Nuevo atajo → nómbralo <em>"Fichar"</em></li>
+        <li>Añade acción: <strong>Obtener contenido de URL</strong></li>
+        <li>URL: <code id="iosUrl" style="background:var(--surface);padding:0.15rem 0.4rem;border-radius:2px;font-size:0.75rem;word-break:break-all;">TU_URL_AQUÍ?action=fichar</code></li>
+        <li>Método: <strong>POST</strong> → Cuerpo tipo JSON → clave <code>action</code> = valor <code>fichar</code></li>
+        <li>Añade acción: <strong>Mostrar resultado</strong> (muestra la respuesta)</li>
+        <li>Opcionalmente: <strong>Añadir a pantalla de inicio</strong> o activarlo desde <strong>Acción de botón</strong> (iPhone 15 Pro+) o <strong>Dynamic Island</strong></li>
+      </ol>
+      <div style="margin-top:1.25rem;padding:0.75rem;background:var(--surface);border-left:2px solid var(--accent);font-size:0.75rem;">
+        El atajo detecta automáticamente si es entrada o salida: si hay una entrada abierta hoy, registra la salida. Si no, registra la entrada.
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
+    <button class="btn btn-ghost" onclick="testConexion()">Probar conexión</button>
+    <button class="btn btn-ghost" onclick="loadAll()">↺ Recargar datos</button>
+  </div>
+</div>
+
+</main>
+
+<!-- ── MODAL: NUEVA AUSENCIA ──────────────────────────────── -->
+<div class="modal-overlay" id="modalAusencia">
+  <div class="modal">
+    <div class="modal-title">Nueva ausencia</div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input class="form-input" id="ausenciaFecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <div class="tipo-grid">
+        <button class="tipo-pill" data-tipo="teletrabajo" onclick="selectTipo(this)">🏠 Teletrabajo</button>
+        <button class="tipo-pill" data-tipo="fuera" onclick="selectTipo(this)">🏢 Fuera oficina</button>
+        <button class="tipo-pill" data-tipo="vacaciones" onclick="selectTipo(this)">🌴 Vacaciones</button>
+        <button class="tipo-pill" data-tipo="baja" onclick="selectTipo(this)">🏥 Baja / IT</button>
+        <button class="tipo-pill" data-tipo="parcial" onclick="selectTipo(this)">⏱ Parcial</button>
+        <button class="tipo-pill" data-tipo="festivo" onclick="selectTipo(this)">🎉 Festivo</button>
+        <button class="tipo-pill" data-tipo="otro" onclick="selectTipo(this)">📋 Otro</button>
+      </div>
+    </div>
+    <div class="form-group" id="parcialMinGroup" style="display:none">
+      <label class="form-label">Minutos de ausencia parcial</label>
+      <input class="form-input" id="parcialMin" type="number" placeholder="ej: 90 (= 1h 30min)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nota (opcional)</label>
+      <input class="form-input" id="ausenciaNota" type="text" placeholder="Médico, reunión externa…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalAusencia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAusencia()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: REGISTRO MANUAL ───────────────────────────────── -->
+<div class="modal-overlay" id="modalAddRegistro">
+  <div class="modal">
+    <div class="modal-title">Añadir registro manual</div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input class="form-input" id="regFecha" type="date">
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Entrada</label>
+        <input class="form-input" id="regEntrada" type="time">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Salida</label>
+        <input class="form-input" id="regSalida" type="time">
+      </div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:-0.5rem;margin-bottom:1rem">
+      Puedes dejar la salida vacía si solo quieres registrar la entrada.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalAddRegistro')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarRegistroManual()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: EDITAR FICHAJE ──────────────────────────────── -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-title">Editar fichaje de hoy</div>
+    <div id="editFichajesList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalEdit')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+let CFG = {
+  url: '',
+  jornadaLJ: 495,   // 8h 15m trabajo real
+  jornadaV:  420    // 7h trabajo real viernes
+};
+
+function loadConfig() {
+  const saved = localStorage.getItem('fichaje_cfg');
+  if (saved) CFG = { ...CFG, ...JSON.parse(saved) };
+  document.getElementById('cfgUrl').value = CFG.url || '';
+  document.getElementById('cfgLJ').value  = CFG.jornadaLJ;
+  document.getElementById('cfgV').value   = CFG.jornadaV;
+  document.getElementById('iosUrl').textContent = (CFG.url || 'TU_URL_AQUÍ') + '?action=fichar';
+  document.getElementById('configBanner').style.display = CFG.url ? 'none' : 'flex';
+}
+
+function saveConfig() {
+  CFG.url       = document.getElementById('cfgUrl').value.trim();
+  CFG.jornadaLJ = parseInt(document.getElementById('cfgLJ').value) || 495;
+  CFG.jornadaV  = parseInt(document.getElementById('cfgV').value)  || 420;
+  localStorage.setItem('fichaje_cfg', JSON.stringify(CFG));
+  document.getElementById('iosUrl').textContent = (CFG.url || 'TU_URL_AQUÍ') + '?action=fichar';
+  document.getElementById('configBanner').style.display = CFG.url ? 'none' : 'flex';
+  toast('Configuración guardada');
+}
+
+// ── ESTADO GLOBAL ────────────────────────────────────────────
+var fichajesHoy = [];
+var resumenMes  = null;
+var ausenciasMes = [];
+var currentMes = (function() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+})();
+var selectedTipo = '';
+
+// ── RELOJ ───────────────────────────────────────────────────
+function tickClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+  updateLiveTrabajado();
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ── API ─────────────────────────────────────────────────────
+async function api(params, body = null) {
+  if (!CFG.url) throw new Error('Configura la URL del Apps Script primero');
+  // Apps Script no admite POST desde navegador (CORS). Usamos siempre GET.
+  const merged = { ...params, ...(body || {}) };
+  const qs = Object.entries(merged)
+    .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v))
+    .join('&');
+  const res = await fetch(CFG.url + '?' + qs, { method: 'GET' });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+}
+
+// ── HELPERS ─────────────────────────────────────────────────
+function minToHM(min) {
+  const h = Math.floor(Math.abs(min) / 60);
+  const m = Math.abs(min) % 60;
+  const sign = min < 0 ? '−' : '';
+  return sign + h + 'h ' + String(m).padStart(2,'0') + 'm';
+}
+
+function today() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+const PAUSA_COMIDA = 60;
+const FESTIVOS_NACIONALES = new Set([
+  "01-01","01-06","05-01","08-15","10-12","11-01","12-06","12-08","12-25"
+]);
+
+function esFestivoNacional(fechaISO) {
+  return FESTIVOS_NACIONALES.has(fechaISO.substring(5));
+}
+
+function esFestivoDia(fechaISO, ausencia) {
+  return esFestivoNacional(fechaISO) || (ausencia && ausencia.Tipo === 'festivo');
+}
+
+function jornadaDia(fecha, tipoAusencia) {
+  // Siempre devuelve TRABAJO REAL (sin comida)
+  const dow = new Date(fecha + 'T12:00:00').getDay();
+  if (dow === 0 || dow === 6) return 0;
+  if (tipoAusencia === 'teletrabajo' || tipoAusencia === 'fuera') return 495; // 8h15m
+  if (dow === 5) return CFG.jornadaV;   // 420 = 7h
+  return CFG.jornadaLJ;                 // 495 = 8h15m
+}
+
+function jornadaBruta(fecha, tipoAusencia) {
+  // Tiempo total en oficina (trabajo real + comida)
+  const t = jornadaDia(fecha, tipoAusencia);
+  if (!t) return 0;
+  if (tipoAusencia === 'teletrabajo' || tipoAusencia === 'fuera') return t;
+  return t + PAUSA_COMIDA;
+}
+
+const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// (estado global declarado arriba)
+
+// ── PANEL: HOY ───────────────────────────────────────────────
+async function loadHoy() {
+  if (!CFG.url) return;
+  try {
+    const res = await api({ action: 'getFichajes', fecha: today() });
+    fichajesHoy = res.fichajes || [];
+    renderFichajesHoy();
+  } catch(e) { toast(e.message, true); }
+}
+
+function renderFichajesHoy() {
+  const cont = document.getElementById('fichajesHoy');
+  if (!fichajesHoy.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div>Sin fichajes hoy</div>';
+    updateTodayStats([]);
+    return;
+  }
+
+  cont.innerHTML = fichajesHoy.map(f => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.5rem;">
+      <div style="display:flex;gap:1.5rem;align-items:center;">
+        <span class="badge badge-green">ENTRADA ${f.Entrada}</span>
+        ${f.Salida ? `<span class="badge badge-red">SALIDA ${f.Salida}</span>` : '<span class="badge badge-yellow">EN CURSO</span>'}
+      </div>
+      <span style="font-size:0.8rem;color:var(--muted)">${f.Minutos ? minToHM(parseInt(f.Minutos)) : '—'}</span>
+    </div>
+  `).join('');
+
+  updateTodayStats(fichajesHoy);
+}
+
+function updateTodayStats(fs) {
+  const jornada = jornadaDia(today());
+  document.getElementById('todayObjetivo').textContent = minToHM(jornada);
+
+  const entradaAbierta = fs.find(f => f.Entrada && !f.Salida);
+  document.getElementById('todayEntrada').textContent = entradaAbierta ? entradaAbierta.Entrada : (fs[0]?.Entrada || '--:--');
+
+  const brutoMin = fs.reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+  // Descontar 1h comida si hay fichajes (en oficina)
+  const totalMin = brutoMin > 0 ? Math.max(0, brutoMin - PAUSA_COMIDA) : 0;
+  document.getElementById('todayTrabajado').textContent = minToHM(totalMin);
+
+  const balance = totalMin - jornada;
+  const balEl = document.getElementById('todayBalance');
+  balEl.textContent = (balance >= 0 ? '+' : '') + minToHM(balance);
+  balEl.className = 'today-time-value ' + (balance >= 0 ? 'positive' : 'negative');
+
+  const pct = jornada > 0 ? Math.min(100, Math.round(totalMin / jornada * 100)) : 0;
+  document.getElementById('todayPct').textContent = pct + '%';
+  const bar = document.getElementById('todayProgress');
+  bar.style.width = pct + '%';
+  bar.className = 'progress-bar ' + (pct >= 100 ? 'over' : pct < 50 ? 'under' : '');
+
+  const badge = document.getElementById('todayBadge');
+  if (entradaAbierta) {
+    badge.textContent = '● EN OFICINA';
+    badge.className = 'badge badge-green';
+    document.getElementById('statusDot').style.background = 'var(--green)';
+  } else if (fs.length) {
+    badge.textContent = '✓ JORNADA CERRADA';
+    badge.className = 'badge badge-muted';
+    document.getElementById('statusDot').style.background = 'var(--accent)';
+  } else {
+    badge.textContent = 'SIN FICHAR';
+    badge.className = 'badge badge-muted';
+  }
+}
+
+let liveInterval = null;
+function updateLiveTrabajado() {
+  const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
+  if (!abierta) return;
+  const [hh, mm] = abierta.Entrada.split(':').map(Number);
+  const entrada = new Date();
+  entrada.setHours(hh, mm, 0, 0);
+  const min = Math.round((new Date() - entrada) / 60000);
+  const completed = fichajesHoy.filter(f => f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+  const brutoTotal = completed + min;
+  const total = brutoTotal > 0 ? Math.max(0, brutoTotal - PAUSA_COMIDA) : 0;
+  const jornada = jornadaDia(today());
+  document.getElementById('todayTrabajado').textContent = minToHM(total);
+  const balance = total - jornada;
+  const balEl = document.getElementById('todayBalance');
+  balEl.textContent = (balance >= 0 ? '+' : '') + minToHM(balance);
+  balEl.className = 'today-time-value ' + (balance >= 0 ? 'positive' : 'negative');
+  const pct = Math.min(100, Math.round(total / jornada * 100));
+  document.getElementById('todayPct').textContent = pct + '%';
+  document.getElementById('todayProgress').style.width = pct + '%';
+}
+
+async function ficharManual() {
+  if (!CFG.url) { showPanel('config'); return; }
+  try {
+    toast('Fichando…');
+    const res = await api({}, { action: 'fichar' });
+    toast(res.tipo === 'entrada'
+      ? `✓ Entrada registrada: ${res.hora}`
+      : `✓ Salida registrada: ${res.hora} (${minToHM(res.minutos)})`
+    );
+    await loadHoy();
+    await loadMes();
+  } catch(e) { toast(e.message, true); }
+}
+
+// ── REGISTRO MANUAL ──────────────────────────────────────────
+function openAddRegistroModal(fecha = null) {
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  const ayerStr = ayer.getFullYear() + '-' + String(ayer.getMonth()+1).padStart(2,'0') + '-' + String(ayer.getDate()).padStart(2,'0');
+  document.getElementById('regFecha').value = fecha || ayerStr;
+  document.getElementById('regEntrada').value = '';
+  document.getElementById('regSalida').value = '';
+  document.getElementById('modalAddRegistro').classList.add('open');
+}
+
+async function guardarRegistroManual() {
+  const fecha   = document.getElementById('regFecha').value;
+  const entrada = document.getElementById('regEntrada').value;
+  const salida  = document.getElementById('regSalida').value;
+  if (!fecha || !entrada) { toast('Fecha y entrada son obligatorias', true); return; }
+  try {
+    await api({}, { action: 'addFichaje', fecha, entrada, salida });
+    toast('✓ Registro guardado');
+    closeModal('modalAddRegistro');
+    await loadHoy();
+    await loadMes();
+  } catch(e) { toast(e.message, true); }
+}
+
+function openDiaOptionsModal(fecha) {
+  const cont = document.getElementById('editFichajesList');
+  cont.innerHTML = `
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">${fecha}</div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openEditDiaModal('${fecha}')">✏️ Editar / borrar fichajes</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openAddRegistroModal('${fecha}')">+ Añadir registro</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openAusenciaModal('${fecha}')">📋 Marcar ausencia</button>
+    </div>`;
+  document.getElementById('modalEdit').classList.add('open');
+}
+
+async function openEditDiaModal(fecha) {
+  try {
+    const res = await api({ action: 'getFichajes', fecha });
+    const fs = res.fichajes || [];
+    const cont = document.getElementById('editFichajesList');
+    if (!fs.length) {
+      cont.innerHTML = `<div class="empty-state">Sin fichajes para ${fecha}</div>`;
+    } else {
+      cont.innerHTML = fs.map(f => {
+        // Asegurar formato HH:MM para el input type=time
+        const fmtHora = h => {
+          if (!h) return '';
+          const p = h.split(':');
+          return String(p[0]).padStart(2,'0') + ':' + String(p[1]||'00').padStart(2,'0');
+        };
+        return `
+        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;">${fecha}</div>
+          <div class="grid-2" style="gap:0.5rem;margin-bottom:0.5rem;">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Entrada</label>
+              <input class="form-input" id="editEnt_${f.ID}" type="time" value="${fmtHora(f.Entrada)}">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Salida</label>
+              <input class="form-input" id="editSal_${f.ID}" type="time" value="${fmtHora(f.Salida)}">
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-ghost btn-sm" onclick="guardarEditFichaje('${f.ID}')">Guardar</button>
+            <button class="btn btn-danger btn-sm" onclick="borrarFichaje('${f.ID}')">Borrar</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    document.getElementById('modalEdit').classList.add('open');
+  } catch(e) { toast(e.message, true); }
+}
+
+async function borrarFichaje(id) {
+  if (!confirm('¿Borrar este fichaje?')) return;
+  try {
+    await api({}, { action: 'deleteFichaje', id });
+    toast('✓ Fichaje borrado');
+    closeModal('modalEdit');
+    await loadHoy();
+    await loadMes();
+  } catch(e) { toast(e.message, true); }
+}
+
+// ── EDITAR FICHAJE ───────────────────────────────────────────
+function openEditModal() {
+  const cont = document.getElementById('editFichajesList');
+  if (!fichajesHoy.length) {
+    cont.innerHTML = '<div class="empty-state">Sin fichajes hoy para editar</div>';
+  } else {
+    cont.innerHTML = fichajesHoy.map(f => `
+      <div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.75rem;">Fichaje ${f.Entrada}</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Entrada</label>
+            <input class="form-input" id="editEnt_${f.ID}" type="time" value="${f.Entrada}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Salida</label>
+            <input class="form-input" id="editSal_${f.ID}" type="time" value="${f.Salida||''}">
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="guardarEditFichaje('${f.ID}')">Guardar</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('modalEdit').classList.add('open');
+}
+
+async function guardarEditFichaje(id) {
+  const entrada = document.getElementById('editEnt_' + id)?.value;
+  const salida  = document.getElementById('editSal_' + id)?.value;
+  try {
+    await api({}, { action: 'editFichaje', id, entrada, salida });
+    toast('✓ Fichaje actualizado');
+    closeModal('modalEdit');
+    await loadHoy();
+  } catch(e) { toast(e.message, true); }
+}
+
+// ── PANEL: MES ───────────────────────────────────────────────
+async function loadMes() {
+  if (!CFG.url) return;
+  try {
+    resumenMes = await api({ action: 'getResumen', mes: currentMes });
+    renderCalendario();
+    renderMesTable();
+    renderMesStats();
+    renderSemanaStats();
+  } catch(e) { toast(e.message, true); }
+}
+
+function renderMesStats() {
+  if (!resumenMes) return;
+  document.getElementById('mesResHoras').textContent    = minToHM(resumenMes.totalTrabajados);
+  document.getElementById('mesResEsperadas').textContent = minToHM(resumenMes.totalEsperados);
+  const bal = resumenMes.balanceTotal;
+  const el = document.getElementById('mesResBalance');
+  el.textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
+  el.className = 'stat-value ' + (bal >= 0 ? 'positive' : 'negative');
+
+  const dias = resumenMes.dias || [];
+  document.getElementById('mesTotal').textContent = minToHM(resumenMes.totalTrabajados);
+  document.getElementById('mesBalance').textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
+  document.getElementById('diasTrabajados').textContent = dias.filter(d => d.fichajes.length > 0 || (d.ausencia && (d.ausencia.Tipo === 'vacaciones' || d.ausencia.Tipo === 'baja' || d.ausencia.Tipo === 'teletrabajo' || d.ausencia.Tipo === 'fuera'))).length;
+  document.getElementById('diasMes').textContent = dias.length + ' días laborables';
+}
+
+function renderSemanaStats() {
+  if (!resumenMes) return;
+
+  const COMIDA     = 60;   // minutos pausa comida oficina
+  const OBJ_LJ     = 495;  // 8h15m trabajo real Lun-Jue
+  const OBJ_V      = 420;  // 7h trabajo real Viernes
+  const SEMANA_OBJ = 40 * 60; // 40h semanales
+  const todayStr   = today();
+
+  // ── 1. SALDO ARRASTRADO DE SEMANAS ANTERIORES DEL MES ────────
+  // Calcular lunes de esta semana
+  const hoy = new Date();
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - (hoy.getDay() === 0 ? 6 : hoy.getDay() - 1));
+  lunes.setHours(0, 0, 0, 0);
+
+  // Días del mes anteriores al lunes de esta semana
+  let saldoArrastrado = 0;
+  (resumenMes.dias || []).forEach(d => {
+    const fd = new Date(d.fecha + 'T12:00:00');
+    if (fd < lunes) {
+      const dow = fd.getDay();
+      if (dow === 0 || dow === 6) return; // fin de semana
+      const ausencia = d.ausencia;
+      if (esFestivoDia(d.fecha, ausencia)) return; // festivo no genera deuda
+      const obj = dow === 5 ? OBJ_V : OBJ_LJ;
+      const esTT = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
+      const esVacBaja = ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
+      const bruto = (d.fichajes || []).reduce((s, f) => s + (parseInt(f.Minutos) || 0), 0);
+      let real;
+      if (esVacBaja) real = obj;
+      else if (esTT) real = bruto > 0 ? bruto : obj;
+      else real = Math.max(0, bruto - COMIDA);
+      saldoArrastrado += real - obj;
+    }
+  });
+
+  // ── 2. DÍAS DE ESTA SEMANA ────────────────────────────────────
+  const DIAS_NOMBRES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+  const semDias = [];
+
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(lunes);
+    d.setDate(lunes.getDate() + i);
+    const fStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const esHoy    = fStr === todayStr;
+    const esFuturo = d > hoy && !esHoy;
+    const dow      = i + 1; // 1=Lun…5=Vie
+    const objDia   = dow === 5 ? OBJ_V : OBJ_LJ;
+
+    const dData   = (resumenMes.dias || []).find(x => x.fecha === fStr);
+    const ausencia = dData ? dData.ausencia : null;
+    const esTT     = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
+    const esVacBaja= ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
+    const esFestivo= esFestivoDia(fStr, ausencia);
+
+    // Festivo: no cuenta para el objetivo ni genera deuda
+    if (esFestivo) {
+      semDias.push({ nombre: DIAS_NOMBRES[i], fecha: fStr, esHoy, esFuturo,
+        objDia: 0, trabajadosReal: 0, balDia: null, ausencia, esTT, esVacBaja,
+        esFestivo: true, tieneFichaje: false });
+      continue;
+    }
+
+    let trabajadosReal = 0;
+
+    if (esVacBaja) {
+      trabajadosReal = objDia;
+    } else if (esHoy) {
+      // Calcular en vivo
+      const completados = fichajesHoy.filter(f => f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+      const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
+      let bruto = completados;
+      if (abierta) {
+        const [hh, mm] = abierta.Entrada.split(':').map(Number);
+        const entradaDate = new Date(); entradaDate.setHours(hh, mm, 0, 0);
+        bruto += Math.round((new Date() - entradaDate) / 60000);
+      }
+      trabajadosReal = esTT ? bruto : Math.max(0, bruto - COMIDA);
+    } else if (!esFuturo && dData) {
+      const bruto = (dData.fichajes || []).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+      trabajadosReal = esTT ? bruto : Math.max(0, bruto - COMIDA);
+    }
+
+    const balDia = esFuturo ? null : trabajadosReal - objDia;
+
+    semDias.push({
+      nombre: DIAS_NOMBRES[i], fecha: fStr, esHoy, esFuturo,
+      objDia, trabajadosReal, balDia, ausencia, esTT, esVacBaja,
+      tieneFichaje: dData && dData.fichajes && dData.fichajes.length > 0
+    });
+  }
+
+  // ── 3. BALANCE SEMANA ACTUAL (días no futuros) ────────────────
+  const diasPasados = semDias.filter(d => !d.esFuturo);
+  const balSemanaActual = diasPasados.reduce((s, d) => s + (d.balDia || 0), 0);
+  const balTotal = saldoArrastrado + balSemanaActual; // saldo acumulado del mes
+
+  // Horas trabajadas esta semana vs objetivo proporcional
+  const trabajadosSemana = diasPasados.reduce((s, d) => s + d.trabajadosReal, 0);
+  const objSemana = diasPasados.reduce((s, d) => s + d.objDia, 0);
+  const pct = objSemana > 0 ? Math.min(100, Math.round(trabajadosSemana / SEMANA_OBJ * 100)) : 0;
+  const restanteSemana = Math.max(0, SEMANA_OBJ - trabajadosSemana);
+
+  // ── 4. ACTUALIZAR UI ──────────────────────────────────────────
+  const balEl = document.getElementById('semanaBalanceBig');
+  balEl.textContent = (balTotal >= 0 ? '+' : '') + minToHM(balTotal);
+  balEl.className = 'semana-balance-big ' + (balTotal >= 0 ? 'positive' : 'negative');
+
+  document.getElementById('semanaHorasTxt').textContent = minToHM(trabajadosSemana) + ' / 40h 00m';
+  document.getElementById('semanaPct').textContent = pct + '%';
+  document.getElementById('semanaRestante').textContent =
+    restanteSemana > 0 ? 'Quedan ' + minToHM(restanteSemana) + ' para 40h' : '✓ Semana completada';
+
+  const bar = document.getElementById('semanaProgressBar');
+  bar.style.width = pct + '%';
+  bar.className = 'semana-progress-bar ' + (balSemanaActual >= 0 ? 'over' : 'under');
+
+  // ── 5. HORA DE SALIDA ESTIMADA ────────────────────────────────
+  const horaSalidaEl = document.getElementById('semanaHoraSalida');
+  const entradaAbierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
+
+  if (entradaAbierta) {
+    const diaHoy = semDias.find(d => d.esHoy);
+    const objHoy = diaHoy ? diaHoy.objDia : OBJ_LJ;
+
+    // Saldo acumulado HASTA AYER (semanas anteriores + días anteriores de esta semana)
+    const balHastaAyer = saldoArrastrado +
+      semDias.filter(d => !d.esHoy && !d.esFuturo).reduce((s, d) => s + (d.balDia || 0), 0);
+
+    // Hora salida = entrada + trabajo pendiente hoy + comida
+    // Trabajo pendiente hoy = 8h15m - saldo_positivo_acumulado (o + deuda si negativo)
+    // Es decir: objHoy - balHastaAyer = lo que aún queda por hacer hoy para quedar a 0
+    const [hh, mm] = entradaAbierta.Entrada.split(':').map(Number);
+    const entradaMs = new Date(); entradaMs.setHours(hh, mm, 0, 0);
+
+    // Minutos desde entrada hasta salida para quedar a 0 en el mes
+    const minHastaQuedara0 = objHoy - balHastaAyer + COMIDA;
+    const salidaCero = new Date(entradaMs.getTime() + minHastaQuedara0 * 60000);
+    const salidaCeroStr = String(salidaCero.getHours()).padStart(2,'0') + ':' + String(salidaCero.getMinutes()).padStart(2,'0');
+
+    // Hora para cumplir solo la jornada de hoy (sin compensar)
+    const salidaHoy = new Date(entradaMs.getTime() + (objHoy + COMIDA) * 60000);
+    const salidaHoyStr = String(salidaHoy.getHours()).padStart(2,'0') + ':' + String(salidaHoy.getMinutes()).padStart(2,'0');
+
+    horaSalidaEl.style.display = 'block';
+
+    const signo = balHastaAyer >= 0 ? '+' : '';
+    const colorSaldo = balHastaAyer >= 0 ? 'var(--green)' : 'var(--red)';
+    const saldoTxt = balHastaAyer !== 0
+      ? ` <span style="color:var(--muted);font-size:0.7rem">(saldo acumulado: <span style="color:${colorSaldo}">${signo}${minToHM(balHastaAyer)}</span>)</span>`
+      : '';
+
+    if (balTotal >= 0) {
+      horaSalidaEl.innerHTML = `<span style="color:var(--green)">▲ Vas <strong>+${minToHM(balTotal)}</strong> en el mes</span>${saldoTxt}
+        &nbsp;·&nbsp; Sal a las <strong style="color:var(--accent)">${salidaCeroStr}</strong> para quedar a 0
+        &nbsp;·&nbsp; <span style="color:var(--muted)">Solo hoy: <strong style="color:var(--text)">${salidaHoyStr}</strong></span>`;
+    } else {
+      horaSalidaEl.innerHTML = `<span style="color:var(--red)">▼ Debes <strong>${minToHM(Math.abs(balTotal))}</strong> en el mes</span>${saldoTxt}
+        &nbsp;·&nbsp; Sal a las <strong style="color:var(--accent)">${salidaCeroStr}</strong> para quedar a 0
+        &nbsp;·&nbsp; <span style="color:var(--muted)">Solo hoy: <strong style="color:var(--text)">${salidaHoyStr}</strong></span>`;
+    }
+  } else {
+    horaSalidaEl.style.display = 'none';
+  }
+
+  // ── 6. BARRAS POR DÍA ────────────────────────────────────────
+  const cont = document.getElementById('semanaDias');
+  cont.innerHTML = semDias.map(d => {
+    const pctDia   = d.objDia > 0 ? Math.min(100, Math.round(d.trabajadosReal / d.objDia * 100)) : 0;
+    const pctComida= (!d.esTT && (d.tieneFichaje || d.esHoy) && !d.esFuturo)
+      ? Math.round(COMIDA / d.objDia * 100) : 0;
+
+    let cls = 'vacio';
+    if (!d.esFuturo) {
+      if (d.esFestivo)                        cls = 'ausencia';
+      else if (d.esVacBaja)                   cls = 'ausencia';
+      else if (d.esTT)                        cls = pctDia >= 100 ? 'completo' : 'parcial';
+      else if (pctDia >= 100)                 cls = 'completo';
+      else if (d.tieneFichaje || d.esHoy)     cls = d.esHoy ? 'hoy' : 'parcial';
+    }
+
+    // Etiqueta balance del día
+    let balLabel = '<span style="color:var(--muted)">—</span>';
+    if (!d.esFuturo && d.balDia !== null) {
+      const c = d.balDia >= 0 ? 'var(--green)' : 'var(--red)';
+      const s = d.balDia >= 0 ? '+' : '';
+      balLabel = `<span style="color:${c}">${s}${minToHM(d.balDia)}</span>`;
+    }
+
+    return `<div class="semana-dia ${d.esHoy ? 'es-hoy' : ''}">
+      <div class="semana-dia-nombre">${d.nombre}</div>
+      <div class="semana-dia-bar-wrap">
+        ${pctComida > 0 ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${pctComida}%;background:#222;border-radius:2px;" title="1h comida"></div>` : ''}
+        <div class="semana-dia-bar-fill ${cls}" style="height:${Math.max(0, Math.min(pctDia, 100 - pctComida))}%;bottom:${pctComida}%"></div>
+      </div>
+      <div class="semana-dia-horas">${balLabel}</div>
+    </div>`;
+  }).join('');
+}
+
+
+function renderMesStats() {
+  if (!resumenMes) return;
+  document.getElementById('mesResHoras').textContent    = minToHM(resumenMes.totalTrabajados);
+  document.getElementById('mesResEsperadas').textContent = minToHM(resumenMes.totalEsperados);
+  const bal = resumenMes.balanceTotal;
+  const el = document.getElementById('mesResBalance');
+  el.textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
+  el.className = 'stat-value ' + (bal >= 0 ? 'positive' : 'negative');
+
+  const dias = resumenMes.dias || [];
+  document.getElementById('mesTotal').textContent = minToHM(resumenMes.totalTrabajados);
+  document.getElementById('mesBalance').textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
+  document.getElementById('diasTrabajados').textContent = dias.filter(d => d.fichajes.length > 0 || (d.ausencia && (d.ausencia.Tipo === 'vacaciones' || d.ausencia.Tipo === 'baja' || d.ausencia.Tipo === 'teletrabajo' || d.ausencia.Tipo === 'fuera'))).length;
+  document.getElementById('diasMes').textContent = dias.length + ' días laborables';
+}
+
+function renderCalendario() {
+  const [year, month] = currentMes.split('-').map(Number);
+  document.getElementById('calMonthTitle').textContent = MESES[month-1] + ' ' + year;
+
+  const grid = document.getElementById('calGrid');
+  const diasNombre = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  grid.innerHTML = diasNombre.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  const primerDia = new Date(year, month-1, 1).getDay();
+  const offset    = primerDia === 0 ? 6 : primerDia - 1;
+  for (let i = 0; i < offset; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
+
+  const totalDias  = new Date(year, month, 0).getDate();
+  const todayStr   = today();
+  const diasData   = {};
+  if (resumenMes) resumenMes.dias.forEach(d => diasData[d.fecha] = d);
+
+  for (let i = 1; i <= totalDias; i++) {
+    const fStr = year + '-' + String(month).padStart(2,'0') + '-' + String(i).padStart(2,'0');
+    const dow  = new Date(fStr + 'T12:00:00').getDay();
+    const d    = diasData[fStr];
+    const isToday  = fStr === todayStr;
+    const isWeekend = dow === 0 || dow === 6;
+
+    let cls = 'cal-day';
+    if (isWeekend) cls += ' weekend';
+    if (isToday)   cls += ' today';
+    if (d?.ausencia?.Tipo === 'vacaciones') cls += ' vacaciones';
+    else if (d?.ausencia?.Tipo === 'baja')  cls += ' baja';
+    else if (d?.ausencia)                   cls += ' has-ausencia';
+    else if (d?.fichajes?.length)           cls += ' has-fichaje';
+
+    grid.innerHTML += `<div class="${cls}" onclick="clickDia('${fStr}')">
+        <span>${i}</span>
+        ${(d || isToday) && !isWeekend ? '<div class="dot"></div>' : ''}
+      </div>`;
+  }
+}
+
+function renderMesTable() {
+  const tb = document.getElementById('mesTableBody');
+  if (!resumenMes || !resumenMes.dias.length) {
+    tb.innerHTML = `<tr><td colspan="6" class="empty-state">Sin datos para este mes</td></tr>`;
+    return;
+  }
+  tb.innerHTML = resumenMes.dias.slice().reverse().map(d => {
+    const bal = d.balance;
+    const balStr = (bal >= 0 ? '+' : '') + minToHM(bal);
+    const balCls = bal > 0 ? 'positive' : bal < 0 ? 'negative' : '';
+    let estado = '';
+    if (d.ausencia?.Tipo === 'vacaciones' || d.ausencia?.Tipo === 'baja') {
+      estado = `<span class="badge badge-blue">${tipoLabel(d.ausencia.Tipo)}</span>`;
+    } else if (d.ausencia) {
+      estado = `<span class="badge badge-yellow">${tipoLabel(d.ausencia.Tipo)}</span>`;
+    } else if (d.fichajes.length && d.trabajados >= d.esperados) {
+      estado = `<span class="badge badge-green">OK</span>`;
+    } else if (d.fichajes.length) {
+      estado = `<span class="badge badge-red">Incompleto</span>`;
+    } else {
+      estado = `<span class="badge badge-muted">Sin datos</span>`;
+    }
+    const dow = d.diaSemana;
+    const esFinSemana = dow === 0 || dow === 6;
+    const acciones = !esFinSemana ? `
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openEditDiaModal('${d.fecha}')" title="Editar fichajes">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="openAusenciaModal('${d.fecha}')" title="Marcar ausencia">📋</button>
+      </td>` : '<td></td>';
+    return `<tr>
+      <td>${d.fecha}</td>
+      <td>${DIAS[d.diaSemana]}</td>
+      <td>${minToHM(d.esperados)}</td>
+      <td>${minToHM(d.trabajados)}</td>
+      <td class="${balCls}">${balStr}</td>
+      <td>${estado}</td>
+      ${acciones}
+    </tr>`;
+  }).join('');
+}
+
+
+function cambiarMes(delta) {
+  const [y, m] = currentMes.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  currentMes = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  loadMes();
+}
+
+// ── PANEL: AUSENCIAS ─────────────────────────────────────────
+async function loadAusencias() {
+  if (!CFG.url) return;
+  try {
+    const res = await api({ action: 'getAusencias', mes: currentMes });
+    ausenciasMes = res.ausencias || [];
+    renderAusenciasTable();
+  } catch(e) { toast(e.message, true); }
+}
+
+function renderAusenciasTable() {
+  const tb = document.getElementById('ausenciasTableBody');
+  if (!ausenciasMes.length) {
+    tb.innerHTML = `<tr><td colspan="5" class="empty-state">No hay ausencias registradas</td></tr>`;
+    return;
+  }
+  tb.innerHTML = ausenciasMes.slice().sort((a,b)=>b.Fecha.localeCompare(a.Fecha)).map(a => `
+    <tr>
+      <td>${a.Fecha}</td>
+      <td>${tipoLabel(a.Tipo)}</td>
+      <td>${a.Nota || '—'}</td>
+      <td>${a.MinutosAusencia ? minToHM(parseInt(a.MinutosAusencia)) : '—'}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="borrarAusencia('${a.ID}')">✕</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function tipoLabel(tipo) {
+  const map = {
+    teletrabajo: '🏠 Teletrabajo',
+    fuera: '🏢 Fuera oficina',
+    vacaciones: '🌴 Vacaciones',
+    baja: '🏥 Baja',
+    parcial: '⏱ Parcial',
+    festivo: '🎉 Festivo',
+    otro: '📋 Otro'
+  };
+  return map[tipo] || tipo;
+}
+
+// selectedTipo declarado arriba
+function openAusenciaModal(fecha = null) {
+  document.getElementById('ausenciaFecha').value = fecha || today();
+  document.getElementById('ausenciaNota').value  = '';
+  document.getElementById('parcialMin').value    = '';
+  document.getElementById('parcialMinGroup').style.display = 'none';
+  document.querySelectorAll('.tipo-pill').forEach(p => p.classList.remove('selected'));
+  selectedTipo = '';
+  document.getElementById('modalAusencia').classList.add('open');
+}
+
+function selectTipo(btn) {
+  document.querySelectorAll('.tipo-pill').forEach(p => p.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedTipo = btn.dataset.tipo;
+  document.getElementById('parcialMinGroup').style.display =
+    selectedTipo === 'parcial' ? 'block' : 'none';
+}
+
+async function guardarAusencia() {
+  if (!selectedTipo) { toast('Selecciona el tipo de ausencia', true); return; }
+  const fecha   = document.getElementById('ausenciaFecha').value;
+  const nota    = document.getElementById('ausenciaNota').value;
+  const minutos = document.getElementById('parcialMin').value;
+  try {
+    await api({}, { action: 'addAusencia', fecha, tipo: selectedTipo, nota, minutos: minutos || '' });
+    toast('✓ Ausencia guardada');
+    closeModal('modalAusencia');
+    await loadAusencias();
+    await loadMes();
+  } catch(e) { toast(e.message, true); }
+}
+
+async function borrarAusencia(id) {
+  if (!confirm('¿Eliminar esta ausencia?')) return;
+  try {
+    await api({}, { action: 'deleteAusencia', id });
+    toast('Ausencia eliminada');
+    await loadAusencias();
+    await loadMes();
+  } catch(e) { toast(e.message, true); }
+}
+
+// ── CONFIG / TEST ────────────────────────────────────────────
+async function testConexion() {
+  if (!CFG.url) { toast('Añade la URL primero', true); return; }
+  try {
+    toast('Probando…');
+    await api({ action: 'getFichajes', fecha: today() });
+    toast('✓ Conexión correcta con Google Sheets');
+  } catch(e) { toast('Error: ' + e.message, true); }
+}
+
+// ── NAVEGACIÓN ───────────────────────────────────────────────
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('nav button')[
+    ['hoy','mes','ausencias','config'].indexOf(name)
+  ].classList.add('active');
+  if (name === 'mes')      loadMes();
+  if (name === 'ausencias') { loadAusencias(); }
+}
+
+// ── MODAL ────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── TOAST ────────────────────────────────────────────────────
+var toastTimer;
+function toast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+async function loadAll() {
+  await loadHoy();
+  await loadMes();
+}
+
+loadConfig();
+if (CFG.url) loadAll();
+</script>
+</body>
+</html>
