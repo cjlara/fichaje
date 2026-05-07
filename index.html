@@ -1040,8 +1040,12 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
 async function loadHoy() {
   if (!CFG.url) return;
   try {
-    const res = await api({ action: 'getFichajes', fecha: today() });
-    fichajesHoy = res.fichajes || [];
+    const [resF, resA] = await Promise.all([
+      api({ action: 'getFichajes', fecha: today() }),
+      api({ action: 'getAusencias', mes: currentMes })
+    ]);
+    fichajesHoy = resF.fichajes || [];
+    ausenciasMes = (resA.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
     renderFichajesHoy();
   } catch(e) { toast(e.message, true); }
 }
@@ -1068,15 +1072,39 @@ function renderFichajesHoy() {
 }
 
 function updateTodayStats(fs) {
-  const jornada = jornadaDia(today());
-  document.getElementById('todayObjetivo').textContent = minToHM(jornada);
+  const todayStr = today();
+  // Buscar ausencia de hoy
+  const ausenciaHoy = ausenciasMes.find(a => String(a.Fecha) === todayStr);
+  const esTTHoy = ausenciaHoy && (ausenciaHoy.Tipo === 'teletrabajo' || ausenciaHoy.Tipo === 'fuera');
+  const esVacBajaHoy = ausenciaHoy && (ausenciaHoy.Tipo === 'vacaciones' || ausenciaHoy.Tipo === 'baja');
+  const esFestivoHoy = esFestivoDia(todayStr, ausenciaHoy);
+
+  const jornada = jornadaDia(todayStr);
+  document.getElementById('todayObjetivo').textContent = esFestivoHoy ? 'Festivo' : minToHM(jornada);
 
   const entradaAbierta = fs.find(f => f.Entrada && !f.Salida);
-  document.getElementById('todayEntrada').textContent = entradaAbierta ? entradaAbierta.Entrada : (fs[0]?.Entrada || '--:--');
+  document.getElementById('todayEntrada').textContent = entradaAbierta ? entradaAbierta.Entrada : (fs[0]?.Entrada || (esTTHoy ? '🏠 TT' : '--:--'));
 
-  const brutoMin = fs.reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
-  // Descontar 1h comida si hay fichajes (en oficina)
-  const totalMin = brutoMin > 0 ? Math.max(0, brutoMin - PAUSA_COMIDA) : 0;
+  // Primera entrada y última salida del día
+  const primeraEntrada = fs.length > 0 ? fs[0].Entrada : null;
+  const ultimaSalida = fs.reduce((s,f) => f.Salida ? f.Salida : s, '');
+  let totalMin = 0;
+
+  if (esFestivoHoy) {
+    totalMin = jornada; // festivo = jornada completa
+  } else if (esVacBajaHoy) {
+    totalMin = jornada;
+  } else if (esTTHoy && fs.length === 0) {
+    totalMin = 495; // teletrabajo sin fichaje = 8h15m
+  } else if (primeraEntrada && ultimaSalida) {
+    const [h1,m1] = primeraEntrada.split(':').map(Number);
+    const [h2,m2] = ultimaSalida.split(':').map(Number);
+    const brutoMin = (h2*60+m2) - (h1*60+m1);
+    totalMin = esTTHoy ? brutoMin : Math.max(0, brutoMin - PAUSA_COMIDA);
+  } else if (primeraEntrada) {
+    const brutoMin = fs.filter(f=>f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+    totalMin = esTTHoy ? brutoMin : Math.max(0, brutoMin - PAUSA_COMIDA);
+  }
   document.getElementById('todayTrabajado').textContent = minToHM(totalMin);
 
   const balance = totalMin - jornada;
@@ -1109,13 +1137,12 @@ let liveInterval = null;
 function updateLiveTrabajado() {
   const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
   if (!abierta) return;
-  const [hh, mm] = abierta.Entrada.split(':').map(Number);
-  const entrada = new Date();
-  entrada.setHours(hh, mm, 0, 0);
-  const min = Math.round((new Date() - entrada) / 60000);
-  const completed = fichajesHoy.filter(f => f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
-  const brutoTotal = completed + min;
-  const total = brutoTotal > 0 ? Math.max(0, brutoTotal - PAUSA_COMIDA) : 0;
+  // Desde la PRIMERA entrada del día hasta ahora
+  const primeraEnt = fichajesHoy[0].Entrada;
+  const [h1, m1] = primeraEnt.split(':').map(Number);
+  const entradaInicial = new Date(); entradaInicial.setHours(h1, m1, 0, 0);
+  const brutoTotal = Math.round((new Date() - entradaInicial) / 60000);
+  const total = Math.max(0, brutoTotal - PAUSA_COMIDA);
   const jornada = jornadaDia(today());
   document.getElementById('todayTrabajado').textContent = minToHM(total);
   const balance = total - jornada;
@@ -1269,7 +1296,13 @@ async function guardarEditFichaje(id) {
 async function loadMes() {
   if (!CFG.url) return;
   try {
-    resumenMes = await api({ action: 'getResumen', mes: currentMes });
+    // Cargar resumen y ausencias en paralelo
+    const [resumen, ausRes] = await Promise.all([
+      api({ action: 'getResumen', mes: currentMes }),
+      api({ action: 'getAusencias', mes: currentMes })
+    ]);
+    resumenMes   = resumen;
+    ausenciasMes = (ausRes.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
     renderCalendario();
     renderMesTable();
     renderMesStats();
@@ -1315,13 +1348,27 @@ function renderSemanaStats() {
     const fd = new Date(d.fecha + 'T12:00:00');
     if (fd < lunes) {
       const dow = fd.getDay();
-      if (dow === 0 || dow === 6) return; // fin de semana
-      const ausencia = d.ausencia;
-      if (esFestivoDia(d.fecha, ausencia)) return; // festivo no genera deuda
+      if (dow === 0 || dow === 6) return;
+      const ausenciaDir = ausenciasMes.find(a => String(a.Fecha) === d.fecha);
+      const ausencia = d.ausencia || ausenciaDir || null;
+      if (esFestivoDia(d.fecha, ausencia)) return;
       const obj = dow === 5 ? OBJ_V : OBJ_LJ;
       const esTT = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
       const esVacBaja = ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
-      const bruto = (d.fichajes || []).reduce((s, f) => s + (parseInt(f.Minutos) || 0), 0);
+      // Sumar todos los fichajes del día y descontar comida UNA sola vez
+      const fs2 = d.fichajes || [];
+      let bruto = 0;
+      if (fs2.length > 0) {
+        const primera = fs2[0].Entrada;
+        const ultima = fs2.reduce((s, f) => f.Salida ? f.Salida : s, '');
+        if (primera && ultima) {
+          const [h1,m1] = primera.split(':').map(Number);
+          const [h2,m2] = ultima.split(':').map(Number);
+          bruto = (h2*60+m2) - (h1*60+m1);
+        } else {
+          bruto = fs2.reduce((s, f) => s + (parseInt(f.Minutos)||0), 0);
+        }
+      }
       let real;
       if (esVacBaja) real = obj;
       else if (esTT) real = bruto > 0 ? bruto : obj;
@@ -1344,7 +1391,9 @@ function renderSemanaStats() {
     const objDia   = dow === 5 ? OBJ_V : OBJ_LJ;
 
     const dData   = (resumenMes.dias || []).find(x => x.fecha === fStr);
-    const ausencia = dData ? dData.ausencia : null;
+    // Buscar ausencia también directamente en ausenciasMes (puede que no haya fichaje ese día)
+    const ausenciaDirecta = ausenciasMes.find(a => String(a.Fecha) === fStr);
+    const ausencia = (dData ? dData.ausencia : null) || ausenciaDirecta || null;
     const esTT     = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
     const esVacBaja= ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
     const esFestivo= esFestivoDia(fStr, ausencia);
@@ -1362,18 +1411,47 @@ function renderSemanaStats() {
     if (esVacBaja) {
       trabajadosReal = objDia;
     } else if (esHoy) {
-      // Calcular en vivo
-      const completados = fichajesHoy.filter(f => f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+      // Primera entrada hasta última salida (o hasta ahora si abierta)
       const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
-      let bruto = completados;
-      if (abierta) {
-        const [hh, mm] = abierta.Entrada.split(':').map(Number);
-        const entradaDate = new Date(); entradaDate.setHours(hh, mm, 0, 0);
-        bruto += Math.round((new Date() - entradaDate) / 60000);
+      let bruto = 0;
+      if (fichajesHoy.length > 0) {
+        const primeraEnt = fichajesHoy[0].Entrada;
+        const [h1,m1] = primeraEnt.split(':').map(Number);
+        if (abierta) {
+          const inicioMs = new Date(); inicioMs.setHours(h1, m1, 0, 0);
+          bruto = Math.round((new Date() - inicioMs) / 60000);
+        } else {
+          const ultimaSal = fichajesHoy.reduce((s,f) => f.Salida ? f.Salida : s, '');
+          if (ultimaSal) {
+            const [h2,m2] = ultimaSal.split(':').map(Number);
+            bruto = (h2*60+m2) - (h1*60+m1);
+          }
+        }
       }
-      trabajadosReal = esTT ? bruto : Math.max(0, bruto - COMIDA);
+      if (esTT && bruto === 0) {
+        // Teletrabajo sin fichaje hoy: contar como jornada completa
+        trabajadosReal = 495;
+      } else {
+        trabajadosReal = esTT ? bruto : Math.max(0, bruto - COMIDA);
+      }
+    } else if (esTT && !esFuturo) {
+      // Teletrabajo sin fichaje en días pasados: jornada completa
+      trabajadosReal = 495;
     } else if (!esFuturo && dData) {
-      const bruto = (dData.fichajes || []).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+      // Primera entrada y última salida del día
+      const fs3 = dData.fichajes || [];
+      let bruto = 0;
+      if (fs3.length > 0) {
+        const primera = fs3[0].Entrada;
+        const ultima = fs3.reduce((s, f) => f.Salida ? f.Salida : s, '');
+        if (primera && ultima) {
+          const [h1,m1] = primera.split(':').map(Number);
+          const [h2,m2] = ultima.split(':').map(Number);
+          bruto = (h2*60+m2) - (h1*60+m1);
+        } else {
+          bruto = fs3.reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+        }
+      }
       trabajadosReal = esTT ? bruto : Math.max(0, bruto - COMIDA);
     }
 
@@ -1604,7 +1682,7 @@ async function loadAusencias() {
   if (!CFG.url) return;
   try {
     const res = await api({ action: 'getAusencias', mes: currentMes });
-    ausenciasMes = res.ausencias || [];
+    ausenciasMes = (res.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
     renderAusenciasTable();
   } catch(e) { toast(e.message, true); }
 }
