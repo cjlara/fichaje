@@ -1052,6 +1052,8 @@ async function loadHoy() {
     fichajesHoy = resF.fichajes || [];
     ausenciasMes = (resA.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
     renderFichajesHoy();
+    // Re-renderizar semana con datos actualizados de hoy
+    if (resumenMes) renderSemanaStats();
   } catch(e) { toast(e.message, true); }
 }
 
@@ -1383,9 +1385,11 @@ function renderSemanaStats() {
         }
       }
       let real;
+      const dowArr = new Date(d.fecha + 'T12:00:00').getDay();
+      const comidaArr = tieneComida(dowArr, ausencia) ? COMIDA : 0;
       if (esVacBaja) real = obj;
       else if (esTT) real = bruto > 0 ? bruto : obj;
-      else real = Math.max(0, bruto - COMIDA);
+      else real = Math.max(0, bruto - comidaArr);
       saldoArrastrado += real - obj;
     }
   });
