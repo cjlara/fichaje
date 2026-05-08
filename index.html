@@ -1157,6 +1157,7 @@ function updateLiveTrabajado() {
   const dowLive = new Date(today() + 'T12:00:00').getDay();
   const ausHoy = ausenciasMes.find(a => String(a.Fecha) === today());
   const comidaLive = tieneComida(dowLive, ausHoy) ? PAUSA_COMIDA : 0;
+  console.log('dowLive:', dowLive, 'comidaLive:', comidaLive, 'bruto:', brutoTotal);
   const total = Math.max(0, brutoTotal - comidaLive);
   const jornada = jornadaDia(today());
   document.getElementById('todayTrabajado').textContent = minToHM(total);
