@@ -482,103 +482,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 .empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
 
-/* ── SEMANA WIDGET ─────────────────────────────────────────── */
-.semana-widget {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-.semana-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 1.25rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.semana-title {
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.semana-balance-big {
-  font-family: var(--font-head);
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1;
-}
-.semana-dias {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  margin-bottom: 1rem;
-}
-.semana-dia {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.semana-dia-nombre {
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.semana-dia-bar-wrap {
-  width: 100%;
-  height: 48px;
-  background: #111;
-  border-radius: 3px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #1e1e1e;
-}
-.semana-dia-bar-fill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-radius: 2px;
-  transition: height 0.4s ease;
-}
-.semana-dia-bar-fill.completo  { background: var(--green); }
-.semana-dia-bar-fill.parcial   { background: var(--accent); }
-.semana-dia-bar-fill.exceso    { background: var(--green); height: 100% !important; }
-.semana-dia-bar-fill.ausencia  { background: var(--blue); }
-.semana-dia-bar-fill.vacio     { background: var(--border); height: 4px !important; }
-.semana-dia-bar-fill.hoy       { background: var(--accent); }
-.semana-dia-horas {
-  font-size: 0.6rem;
-  color: var(--muted);
-}
-.semana-dia.es-hoy .semana-dia-nombre { color: var(--accent); }
-.semana-totales {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-.semana-progress-wrap {
-  background: var(--border);
-  border-radius: 2px;
-  height: 4px;
-  overflow: hidden;
-  margin-top: 0.75rem;
-}
-.semana-progress-bar {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s ease;
-  background: var(--accent);
-}
-.semana-progress-bar.over { background: var(--green); }
-.semana-progress-bar.under { background: var(--red); }
-
 /* ── SCROLLBAR ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -593,10 +496,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div class="logo-dot" id="statusDot"></div>
     FICHAJE
   </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-    <div class="clock" id="clock">--:--:--</div>
-    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;">v2.1.9</div>
-  </div>
+  <div class="clock" id="clock">--:--:--</div>
 </header>
 
 <!-- ── NAV ─────────────────────────────────────────────────── -->
@@ -655,8 +555,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <button class="btn btn-primary" onclick="ficharManual()">
         ⏱ Fichar ahora
       </button>
-      <button class="btn btn-ghost btn-sm" onclick="openEditModal()">Editar hoy</button>
-      <button class="btn btn-ghost btn-sm" onclick="openAddRegistroModal()">+ Registro manual</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal()">Editar</button>
     </div>
   </div>
 
@@ -670,28 +569,12 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     </div>
   </div>
 
-  <!-- SEMANA WIDGET -->
-  <div class="semana-widget">
-    <div class="semana-header">
-      <div class="semana-title">Semana actual · 40h objetivo</div>
-      <div>
-        <span style="font-size:0.7rem;color:var(--muted);margin-right:0.5rem" id="semanaHorasTxt">0h 00m / 40h</span>
-        <span class="semana-balance-big" id="semanaBalanceBig">—</span>
-      </div>
+  <div class="grid-3">
+    <div class="stat">
+      <div class="stat-label">Esta semana</div>
+      <div class="stat-value" id="semanaTotal">0h</div>
+      <div class="stat-sub" id="semanaBalance">—</div>
     </div>
-    <div class="semana-dias" id="semanaDias"></div>
-    <div class="semana-progress-wrap">
-      <div class="semana-progress-bar" id="semanaProgressBar" style="width:0%"></div>
-    </div>
-    <div class="semana-totales">
-      <span id="semanaPct">0%</span>
-      <span id="semanaRestante">—</span>
-    </div>
-    <div id="semanaHoraSalida" style="margin-top:1rem;padding:0.75rem;background:var(--surface);border-radius:3px;font-size:0.8rem;display:none;">
-    </div>
-  </div>
-
-  <div class="grid-2">
     <div class="stat">
       <div class="stat-label">Este mes</div>
       <div class="stat-value" id="mesTotal">0h</div>
@@ -732,10 +615,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   </div>
 
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <div class="card-title" style="margin:0">Detalle por día</div>
-      <button class="btn btn-ghost btn-sm" onclick="openAddRegistroModal()">+ Añadir registro</button>
-    </div>
+    <div class="card-title">Detalle por día</div>
     <div class="table-wrap">
       <table id="mesTable">
         <thead>
@@ -746,7 +626,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
             <th>Trabajado</th>
             <th>Balance</th>
             <th>Estado</th>
-            <th></th>
           </tr>
         </thead>
         <tbody id="mesTableBody">
@@ -798,7 +677,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <div class="config-label">URL del Web App</div>
         <div class="config-desc">Pégala desde: Apps Script → Implementar → Gestionar implementaciones</div>
       </div>
-      <input class="config-input" id="cfgUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec">
+      <input class="config-input" id="cfgUrl" type="text" placeholder="https://script.google.com/macros/s/…/exec"
+        onchange="saveConfig()">
     </div>
   </div>
 
@@ -807,16 +687,16 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div class="config-row">
       <div>
         <div class="config-label">Lunes – Jueves</div>
-        <div class="config-desc">Minutos presencia oficina Lun–Jue (trabajo + comida). Default: 555 = 9h15m</div>
+        <div class="config-desc">Minutos de jornada estándar</div>
       </div>
-      <input class="config-input" id="cfgLJ" type="number" value="495" style="width:120px">
+      <input class="config-input" id="cfgLJ" type="number" value="495" style="width:120px" onchange="saveConfig()">
     </div>
     <div class="config-row">
       <div>
         <div class="config-label">Viernes</div>
-        <div class="config-desc">Minutos presencia oficina Viernes (trabajo + comida). Default: 480 = 8h</div>
+        <div class="config-desc">Minutos de jornada en viernes</div>
       </div>
-      <input class="config-input" id="cfgV" type="number" value="420" style="width:120px">
+      <input class="config-input" id="cfgV" type="number" value="420" style="width:120px" onchange="saveConfig()">
     </div>
   </div>
 
@@ -839,8 +719,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   </div>
 
   <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-    <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar configuración</button>
-    <button class="btn btn-ghost" onclick="testConexion()">Probar conexión</button>
+    <button class="btn btn-primary" onclick="testConexion()">Probar conexión</button>
     <button class="btn btn-ghost" onclick="loadAll()">↺ Recargar datos</button>
   </div>
 </div>
@@ -863,7 +742,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <button class="tipo-pill" data-tipo="vacaciones" onclick="selectTipo(this)">🌴 Vacaciones</button>
         <button class="tipo-pill" data-tipo="baja" onclick="selectTipo(this)">🏥 Baja / IT</button>
         <button class="tipo-pill" data-tipo="parcial" onclick="selectTipo(this)">⏱ Parcial</button>
-        <button class="tipo-pill" data-tipo="festivo" onclick="selectTipo(this)">🎉 Festivo</button>
         <button class="tipo-pill" data-tipo="otro" onclick="selectTipo(this)">📋 Otro</button>
       </div>
     </div>
@@ -878,34 +756,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modalAusencia')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarAusencia()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL: REGISTRO MANUAL ───────────────────────────────── -->
-<div class="modal-overlay" id="modalAddRegistro">
-  <div class="modal">
-    <div class="modal-title">Añadir registro manual</div>
-    <div class="form-group">
-      <label class="form-label">Fecha</label>
-      <input class="form-input" id="regFecha" type="date">
-    </div>
-    <div class="grid-2">
-      <div class="form-group">
-        <label class="form-label">Entrada</label>
-        <input class="form-input" id="regEntrada" type="time">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Salida</label>
-        <input class="form-input" id="regSalida" type="time">
-      </div>
-    </div>
-    <div style="font-size:0.72rem;color:var(--muted);margin-top:-0.5rem;margin-bottom:1rem">
-      Puedes dejar la salida vacía si solo quieres registrar la entrada.
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalAddRegistro')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarRegistroManual()">Guardar</button>
     </div>
   </div>
 </div>
@@ -928,8 +778,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 // ── CONFIG ──────────────────────────────────────────────────
 let CFG = {
   url: '',
-  jornadaLJ: 495,   // 8h 15m trabajo real
-  jornadaV:  420    // 7h trabajo real viernes
+  jornadaLJ: 495,   // 8h 15m
+  jornadaV:  420    // 7h
 };
 
 function loadConfig() {
@@ -952,16 +802,6 @@ function saveConfig() {
   toast('Configuración guardada');
 }
 
-// ── ESTADO GLOBAL ────────────────────────────────────────────
-var fichajesHoy = [];
-var resumenMes  = null;
-var ausenciasMes = [];
-var currentMes = (function() {
-  var d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-})();
-var selectedTipo = '';
-
 // ── RELOJ ───────────────────────────────────────────────────
 function tickClock() {
   const now = new Date();
@@ -977,12 +817,11 @@ tickClock();
 // ── API ─────────────────────────────────────────────────────
 async function api(params, body = null) {
   if (!CFG.url) throw new Error('Configura la URL del Apps Script primero');
-  // Apps Script no admite POST desde navegador (CORS). Usamos siempre GET.
-  const merged = { ...params, ...(body || {}) };
-  const qs = Object.entries(merged)
-    .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v))
-    .join('&');
-  const res = await fetch(CFG.url + '?' + qs, { method: 'GET' });
+  const url = CFG.url + '?' + new URLSearchParams(params);
+  const opts = body
+    ? { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }
+    : { method: 'GET' };
+  const res = await fetch(url, opts);
   const json = await res.json();
   if (json.error) throw new Error(json.error);
   return json;
@@ -1003,60 +842,33 @@ function today() {
     String(d.getDate()).padStart(2,'0');
 }
 
-const PAUSA_COMIDA = 60;
-const FESTIVOS_NACIONALES = new Set([
-  "01-01","01-06","05-01","08-15","10-12","11-01","12-06","12-08","12-25"
-]);
-
-function esFestivoNacional(fechaISO) {
-  return FESTIVOS_NACIONALES.has(fechaISO.substring(5));
-}
-
-function esFestivoDia(fechaISO, ausencia) {
-  return esFestivoNacional(fechaISO) || (ausencia && ausencia.Tipo === 'festivo');
-}
-
-function jornadaDia(fecha, tipoAusencia) {
+function jornadaDia(fecha) {
   const dow = new Date(fecha + 'T12:00:00').getDay();
+  if (dow === 5) return CFG.jornadaV;
   if (dow === 0 || dow === 6) return 0;
-  if (tipoAusencia === 'teletrabajo' || tipoAusencia === 'fuera') return 495; // 8h15m sin comida
-  if (dow === 5) return CFG.jornadaV;   // 420 = 7h sin comida (jornada continua)
-  return CFG.jornadaLJ;                 // 495 = 8h15m
-}
-
-function tieneComida(dow, ausencia) {
-  // Solo Lun-Jue en oficina tienen pausa de comida
-  const esTT = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
-  return dow >= 1 && dow <= 4 && !esTT;
-}
-
-function jornadaBruta(fecha, tipoAusencia) {
-  // Tiempo total en oficina (trabajo real + comida)
-  const t = jornadaDia(fecha, tipoAusencia);
-  if (!t) return 0;
-  if (tipoAusencia === 'teletrabajo' || tipoAusencia === 'fuera') return t;
-  return t + PAUSA_COMIDA;
+  return CFG.jornadaLJ;
 }
 
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-// (estado global declarado arriba)
+// ── ESTADO GLOBAL ────────────────────────────────────────────
+let fichajesHoy = [];
+let resumenMes  = null;
+let ausenciasMes = [];
+let currentMes = (() => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+})();
 
 // ── PANEL: HOY ───────────────────────────────────────────────
 async function loadHoy() {
   if (!CFG.url) return;
   try {
-    const [resF, resA] = await Promise.all([
-      api({ action: 'getFichajes', fecha: today() }),
-      api({ action: 'getAusencias', mes: currentMes })
-    ]);
-    fichajesHoy = resF.fichajes || [];
-    ausenciasMes = (resA.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
+    const res = await api({ action: 'getFichajes', fecha: today() });
+    fichajesHoy = res.fichajes || [];
     renderFichajesHoy();
-    // Re-renderizar semana con datos actualizados de hoy
-    if (resumenMes) renderSemanaStats();
   } catch(e) { toast(e.message, true); }
 }
 
@@ -1082,44 +894,13 @@ function renderFichajesHoy() {
 }
 
 function updateTodayStats(fs) {
-  const todayStr = today();
-  // Buscar ausencia de hoy
-  const ausenciaHoy = ausenciasMes.find(a => String(a.Fecha) === todayStr);
-  const esTTHoy = ausenciaHoy && (ausenciaHoy.Tipo === 'teletrabajo' || ausenciaHoy.Tipo === 'fuera');
-  const esVacBajaHoy = ausenciaHoy && (ausenciaHoy.Tipo === 'vacaciones' || ausenciaHoy.Tipo === 'baja');
-  const esFestivoHoy = esFestivoDia(todayStr, ausenciaHoy);
-
-  const jornada = jornadaDia(todayStr);
-  document.getElementById('todayObjetivo').textContent = esFestivoHoy ? 'Festivo' : minToHM(jornada);
+  const jornada = jornadaDia(today());
+  document.getElementById('todayObjetivo').textContent = minToHM(jornada);
 
   const entradaAbierta = fs.find(f => f.Entrada && !f.Salida);
-  document.getElementById('todayEntrada').textContent = entradaAbierta ? entradaAbierta.Entrada : (fs[0]?.Entrada || (esTTHoy ? '🏠 TT' : '--:--'));
+  document.getElementById('todayEntrada').textContent = entradaAbierta ? entradaAbierta.Entrada : (fs[0]?.Entrada || '--:--');
 
-  const primeraEntrada = fs.length > 0 ? fs[0].Entrada : null;
-  const ultimaSalida = fs.reduce((s,f) => f.Salida ? f.Salida : s, '');
-  const dow = new Date(todayStr + 'T12:00:00').getDay();
-  const comidaHoy = tieneComida(dow, ausenciaHoy) ? PAUSA_COMIDA : 0;
-  let totalMin = 0;
-
-  if (esFestivoHoy) {
-    totalMin = jornada;
-  } else if (esVacBajaHoy) {
-    totalMin = jornada;
-  } else if (esTTHoy && fs.length === 0) {
-    totalMin = 495;
-  } else if (primeraEntrada && entradaAbierta) {
-    // Jornada en curso: desde primera entrada hasta ahora
-    const [h1,m1] = primeraEntrada.split(':').map(Number);
-    const ahora = new Date();
-    const entradaMs = new Date(); entradaMs.setHours(h1, m1, 0, 0);
-    const brutoMin = Math.round((ahora - entradaMs) / 60000);
-    totalMin = Math.max(0, brutoMin - comidaHoy);
-  } else if (primeraEntrada && ultimaSalida) {
-    // Jornada cerrada: primera entrada hasta última salida
-    const [h1,m1] = primeraEntrada.split(':').map(Number);
-    const [h2,m2] = ultimaSalida.split(':').map(Number);
-    totalMin = Math.max(0, (h2*60+m2) - (h1*60+m1) - comidaHoy);
-  }
+  const totalMin = fs.reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
   document.getElementById('todayTrabajado').textContent = minToHM(totalMin);
 
   const balance = totalMin - jornada;
@@ -1152,16 +933,12 @@ let liveInterval = null;
 function updateLiveTrabajado() {
   const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
   if (!abierta) return;
-  // Desde la PRIMERA entrada del día hasta ahora
-  const primeraEnt = fichajesHoy[0].Entrada;
-  const [h1, m1] = primeraEnt.split(':').map(Number);
-  const entradaInicial = new Date(); entradaInicial.setHours(h1, m1, 0, 0);
-  const brutoTotal = Math.round((new Date() - entradaInicial) / 60000);
-  const dowLive = new Date(today() + 'T12:00:00').getDay();
-  const ausHoy = ausenciasMes.find(a => String(a.Fecha) === today());
-  const comidaLive = tieneComida(dowLive, ausHoy) ? PAUSA_COMIDA : 0;
-  console.log('dowLive:', dowLive, 'comidaLive:', comidaLive, 'bruto:', brutoTotal);
-  const total = Math.max(0, brutoTotal - comidaLive);
+  const [hh, mm] = abierta.Entrada.split(':').map(Number);
+  const entrada = new Date();
+  entrada.setHours(hh, mm, 0, 0);
+  const min = Math.round((new Date() - entrada) / 60000);
+  const completed = fichajesHoy.filter(f => f.Minutos).reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
+  const total = completed + min;
   const jornada = jornadaDia(today());
   document.getElementById('todayTrabajado').textContent = minToHM(total);
   const balance = total - jornada;
@@ -1182,93 +959,6 @@ async function ficharManual() {
       ? `✓ Entrada registrada: ${res.hora}`
       : `✓ Salida registrada: ${res.hora} (${minToHM(res.minutos)})`
     );
-    await loadHoy();
-    await loadMes();
-  } catch(e) { toast(e.message, true); }
-}
-
-// ── REGISTRO MANUAL ──────────────────────────────────────────
-function openAddRegistroModal(fecha = null) {
-  const ayer = new Date();
-  ayer.setDate(ayer.getDate() - 1);
-  const ayerStr = ayer.getFullYear() + '-' + String(ayer.getMonth()+1).padStart(2,'0') + '-' + String(ayer.getDate()).padStart(2,'0');
-  document.getElementById('regFecha').value = fecha || ayerStr;
-  document.getElementById('regEntrada').value = '';
-  document.getElementById('regSalida').value = '';
-  document.getElementById('modalAddRegistro').classList.add('open');
-}
-
-async function guardarRegistroManual() {
-  const fecha   = document.getElementById('regFecha').value;
-  const entrada = document.getElementById('regEntrada').value;
-  const salida  = document.getElementById('regSalida').value;
-  if (!fecha || !entrada) { toast('Fecha y entrada son obligatorias', true); return; }
-  try {
-    await api({}, { action: 'addFichaje', fecha, entrada, salida });
-    toast('✓ Registro guardado');
-    closeModal('modalAddRegistro');
-    await loadHoy();
-    await loadMes();
-  } catch(e) { toast(e.message, true); }
-}
-
-function openDiaOptionsModal(fecha) {
-  const cont = document.getElementById('editFichajesList');
-  cont.innerHTML = `
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">${fecha}</div>
-    <div style="display:flex;flex-direction:column;gap:0.75rem;">
-      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openEditDiaModal('${fecha}')">✏️ Editar / borrar fichajes</button>
-      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openAddRegistroModal('${fecha}')">+ Añadir registro</button>
-      <button class="btn btn-ghost" onclick="closeModal('modalEdit');openAusenciaModal('${fecha}')">📋 Marcar ausencia</button>
-    </div>`;
-  document.getElementById('modalEdit').classList.add('open');
-}
-
-async function openEditDiaModal(fecha) {
-  try {
-    const res = await api({ action: 'getFichajes', fecha });
-    const fs = res.fichajes || [];
-    const cont = document.getElementById('editFichajesList');
-    if (!fs.length) {
-      cont.innerHTML = `<div class="empty-state">Sin fichajes para ${fecha}</div>`;
-    } else {
-      cont.innerHTML = fs.map(f => {
-        // Asegurar formato HH:MM para el input type=time
-        const fmtHora = h => {
-          if (!h) return '';
-          const p = h.split(':');
-          return String(p[0]).padStart(2,'0') + ':' + String(p[1]||'00').padStart(2,'0');
-        };
-        return `
-        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
-          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;">${fecha}</div>
-          <div class="grid-2" style="gap:0.5rem;margin-bottom:0.5rem;">
-            <div class="form-group" style="margin:0">
-              <label class="form-label">Entrada</label>
-              <input class="form-input" id="editEnt_${f.ID}" type="time" value="${fmtHora(f.Entrada)}">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label class="form-label">Salida</label>
-              <input class="form-input" id="editSal_${f.ID}" type="time" value="${fmtHora(f.Salida)}">
-            </div>
-          </div>
-          <div style="display:flex;gap:0.5rem;">
-            <button class="btn btn-ghost btn-sm" onclick="guardarEditFichaje('${f.ID}')">Guardar</button>
-            <button class="btn btn-danger btn-sm" onclick="borrarFichaje('${f.ID}')">Borrar</button>
-          </div>
-        </div>`;
-      }).join('');
-    }
-    document.getElementById('modalEdit').classList.add('open');
-  } catch(e) { toast(e.message, true); }
-}
-
-async function borrarFichaje(id) {
-  if (!confirm('¿Borrar este fichaje?')) return;
-  try {
-    await api({}, { action: 'deleteFichaje', id });
-    toast('✓ Fichaje borrado');
-    closeModal('modalEdit');
     await loadHoy();
     await loadMes();
   } catch(e) { toast(e.message, true); }
@@ -1315,13 +1005,7 @@ async function guardarEditFichaje(id) {
 async function loadMes() {
   if (!CFG.url) return;
   try {
-    // Cargar resumen y ausencias en paralelo
-    const [resumen, ausRes] = await Promise.all([
-      api({ action: 'getResumen', mes: currentMes }),
-      api({ action: 'getAusencias', mes: currentMes })
-    ]);
-    resumenMes   = resumen;
-    ausenciasMes = (ausRes.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
+    resumenMes = await api({ action: 'getResumen', mes: currentMes });
     renderCalendario();
     renderMesTable();
     renderMesStats();
@@ -1341,292 +1025,30 @@ function renderMesStats() {
   const dias = resumenMes.dias || [];
   document.getElementById('mesTotal').textContent = minToHM(resumenMes.totalTrabajados);
   document.getElementById('mesBalance').textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
-  document.getElementById('diasTrabajados').textContent = dias.filter(d => d.fichajes.length > 0 || (d.ausencia && (d.ausencia.Tipo === 'vacaciones' || d.ausencia.Tipo === 'baja' || d.ausencia.Tipo === 'teletrabajo' || d.ausencia.Tipo === 'fuera'))).length;
+  document.getElementById('diasTrabajados').textContent = dias.filter(d => d.trabajados > 0).length;
   document.getElementById('diasMes').textContent = dias.length + ' días laborables';
 }
 
 function renderSemanaStats() {
   if (!resumenMes) return;
-
-  const COMIDA     = 60;   // minutos pausa comida oficina
-  const OBJ_LJ     = 495;  // 8h15m trabajo real Lun-Jue
-  const OBJ_V      = 420;  // 7h trabajo real Viernes
-  const SEMANA_OBJ = 40 * 60; // 40h semanales
-  const todayStr   = today();
-
-  // ── 1. SALDO ARRASTRADO DE SEMANAS ANTERIORES DEL MES ────────
-  // Calcular lunes de esta semana
-  const hoy = new Date();
+  const dias = resumenMes.dias || [];
+  const hoy  = new Date();
   const lunes = new Date(hoy);
   lunes.setDate(hoy.getDate() - (hoy.getDay() === 0 ? 6 : hoy.getDay() - 1));
-  lunes.setHours(0, 0, 0, 0);
 
-  // Días del mes anteriores al lunes de esta semana
-  let saldoArrastrado = 0;
-  (resumenMes.dias || []).forEach(d => {
+  let semTrabajados = 0, semEsperados = 0;
+  dias.forEach(d => {
     const fd = new Date(d.fecha + 'T12:00:00');
-    if (fd < lunes) {
-      const dow = fd.getDay();
-      if (dow === 0 || dow === 6) return;
-      const ausenciaDir = ausenciasMes.find(a => String(a.Fecha) === d.fecha);
-      const ausencia = d.ausencia || ausenciaDir || null;
-      if (esFestivoDia(d.fecha, ausencia)) return;
-      const obj = dow === 5 ? OBJ_V : OBJ_LJ;
-      const esTT = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
-      const esVacBaja = ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
-      // Sumar todos los fichajes del día y descontar comida UNA sola vez
-      const fs2 = d.fichajes || [];
-      let bruto = 0;
-      if (fs2.length > 0) {
-        const primera = fs2[0].Entrada;
-        const ultima = fs2.reduce((s, f) => f.Salida ? f.Salida : s, '');
-        if (primera && ultima) {
-          const [h1,m1] = primera.split(':').map(Number);
-          const [h2,m2] = ultima.split(':').map(Number);
-          bruto = (h2*60+m2) - (h1*60+m1);
-        } else {
-          bruto = fs2.reduce((s, f) => s + (parseInt(f.Minutos)||0), 0);
-        }
-      }
-      let real;
-      const dowArr = new Date(d.fecha + 'T12:00:00').getDay();
-      // Ausencia de día completo prevalece sobre fichajes
-      if (esVacBaja) real = obj;
-      else if (esTT) real = 495; // teletrabajo/fuera siempre 8h15m
-      else {
-        const comidaArr = tieneComida(dowArr, ausencia) ? COMIDA : 0;
-        real = Math.max(0, bruto - comidaArr);
-      }
-      saldoArrastrado += real - obj;
+    if (fd >= lunes && fd <= hoy) {
+      semTrabajados += d.trabajados;
+      semEsperados  += d.esperados;
     }
   });
-
-  // ── 2. DÍAS DE ESTA SEMANA ────────────────────────────────────
-  const DIAS_NOMBRES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
-  const semDias = [];
-
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(lunes);
-    d.setDate(lunes.getDate() + i);
-    const fStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    const esHoy    = fStr === todayStr;
-    const esFuturo = d > hoy && !esHoy;
-    const dow      = i + 1; // 1=Lun…5=Vie
-    const objDia   = dow === 5 ? OBJ_V : OBJ_LJ;
-
-    const dData   = (resumenMes.dias || []).find(x => x.fecha === fStr);
-    // Buscar ausencia también directamente en ausenciasMes (puede que no haya fichaje ese día)
-    const ausenciaDirecta = ausenciasMes.find(a => String(a.Fecha) === fStr);
-    const ausencia = (dData ? dData.ausencia : null) || ausenciaDirecta || null;
-    const esTT     = ausencia && (ausencia.Tipo === 'teletrabajo' || ausencia.Tipo === 'fuera');
-    const esVacBaja= ausencia && (ausencia.Tipo === 'vacaciones' || ausencia.Tipo === 'baja');
-    const esFestivo= esFestivoDia(fStr, ausencia);
-
-    // Festivo: no cuenta para el objetivo ni genera deuda
-    if (esFestivo) {
-      semDias.push({ nombre: DIAS_NOMBRES[i], fecha: fStr, esHoy, esFuturo,
-        objDia: 0, trabajadosReal: 0, balDia: null, ausencia, esTT, esVacBaja,
-        esFestivo: true, tieneFichaje: false });
-      continue;
-    }
-
-    let trabajadosReal = 0;
-
-    if (esVacBaja) {
-      trabajadosReal = objDia;
-    } else if (esHoy) {
-      // Primera entrada hasta última salida (o hasta ahora si abierta)
-      const abierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
-      let bruto = 0;
-      if (fichajesHoy.length > 0) {
-        const primeraEnt = fichajesHoy[0].Entrada;
-        const [h1,m1] = primeraEnt.split(':').map(Number);
-        if (abierta) {
-          const inicioMs = new Date(); inicioMs.setHours(h1, m1, 0, 0);
-          bruto = Math.round((new Date() - inicioMs) / 60000);
-        } else {
-          const ultimaSal = fichajesHoy.reduce((s,f) => f.Salida ? f.Salida : s, '');
-          if (ultimaSal) {
-            const [h2,m2] = ultimaSal.split(':').map(Number);
-            bruto = (h2*60+m2) - (h1*60+m1);
-          }
-        }
-      }
-      if (esTT && bruto === 0) {
-        // Teletrabajo sin fichaje hoy: contar como jornada completa
-        trabajadosReal = 495;
-      } else {
-        const dowH = new Date(fStr + 'T12:00:00').getDay();
-        const comidaH = tieneComida(dowH, ausencia) ? COMIDA : 0;
-        trabajadosReal = Math.max(0, bruto - comidaH);
-      }
-    } else if (esTT && !esFuturo) {
-      // Teletrabajo sin fichaje en días pasados: jornada completa
-      trabajadosReal = 495;
-    } else if (!esFuturo && dData) {
-      // Primera entrada y última salida del día
-      const fs3 = dData.fichajes || [];
-      let bruto = 0;
-      if (fs3.length > 0) {
-        const primera = fs3[0].Entrada;
-        const ultima = fs3.reduce((s, f) => f.Salida ? f.Salida : s, '');
-        if (primera && ultima) {
-          const [h1,m1] = primera.split(':').map(Number);
-          const [h2,m2] = ultima.split(':').map(Number);
-          bruto = (h2*60+m2) - (h1*60+m1);
-        } else {
-          bruto = fs3.reduce((s,f) => s + (parseInt(f.Minutos)||0), 0);
-        }
-      }
-      // Ausencia de día completo prevalece sobre fichajes
-      if (esVacBaja) {
-        trabajadosReal = objDia;
-      } else if (esTT) {
-        trabajadosReal = 495; // teletrabajo/fuera siempre 8h15m
-      } else {
-        const dowP = new Date(fStr + 'T12:00:00').getDay();
-        const comidaP = tieneComida(dowP, ausencia) ? COMIDA : 0;
-        trabajadosReal = Math.max(0, bruto - comidaP);
-      }
-    }
-
-    const balDia = esFuturo ? null : trabajadosReal - objDia;
-
-    semDias.push({
-      nombre: DIAS_NOMBRES[i], fecha: fStr, esHoy, esFuturo,
-      objDia, trabajadosReal, balDia, ausencia, esTT, esVacBaja,
-      tieneFichaje: dData && dData.fichajes && dData.fichajes.length > 0
-    });
-  }
-
-  // ── 3. BALANCE SEMANA ACTUAL (días no futuros) ────────────────
-  const diasPasados = semDias.filter(d => !d.esFuturo);
-  const balSemanaActual = diasPasados.reduce((s, d) => s + (d.balDia || 0), 0);
-  const balTotal = saldoArrastrado + balSemanaActual; // saldo acumulado del mes
-
-  // Horas trabajadas esta semana vs objetivo proporcional
-  const trabajadosSemana = diasPasados.reduce((s, d) => s + d.trabajadosReal, 0);
-  const objSemana = diasPasados.reduce((s, d) => s + d.objDia, 0);
-  const pct = objSemana > 0 ? Math.min(100, Math.round(trabajadosSemana / SEMANA_OBJ * 100)) : 0;
-  const restanteSemana = Math.max(0, SEMANA_OBJ - trabajadosSemana);
-
-  // ── 4. ACTUALIZAR UI ──────────────────────────────────────────
-  const balEl = document.getElementById('semanaBalanceBig');
-  balEl.textContent = (balTotal >= 0 ? '+' : '') + minToHM(balTotal);
-  balEl.className = 'semana-balance-big ' + (balTotal >= 0 ? 'positive' : 'negative');
-
-  document.getElementById('semanaHorasTxt').textContent = minToHM(trabajadosSemana) + ' / 40h 00m';
-  document.getElementById('semanaPct').textContent = pct + '%';
-  document.getElementById('semanaRestante').textContent =
-    restanteSemana > 0 ? 'Quedan ' + minToHM(restanteSemana) + ' para 40h' : '✓ Semana completada';
-
-  const bar = document.getElementById('semanaProgressBar');
-  bar.style.width = pct + '%';
-  bar.className = 'semana-progress-bar ' + (balSemanaActual >= 0 ? 'over' : 'under');
-
-  // ── 5. HORA DE SALIDA ESTIMADA ────────────────────────────────
-  const horaSalidaEl = document.getElementById('semanaHoraSalida');
-  const entradaAbierta = fichajesHoy.find(f => f.Entrada && !f.Salida);
-
-  if (entradaAbierta) {
-    const diaHoy = semDias.find(d => d.esHoy);
-    const objHoy = diaHoy ? diaHoy.objDia : OBJ_LJ;
-
-    // Saldo acumulado HASTA AYER (semanas anteriores + días anteriores de esta semana)
-    const balHastaAyer = saldoArrastrado +
-      semDias.filter(d => !d.esHoy && !d.esFuturo).reduce((s, d) => s + (d.balDia || 0), 0);
-
-    // Hora salida = entrada + trabajo pendiente hoy + comida
-    // Trabajo pendiente hoy = 8h15m - saldo_positivo_acumulado (o + deuda si negativo)
-    // Es decir: objHoy - balHastaAyer = lo que aún queda por hacer hoy para quedar a 0
-    const [hh, mm] = entradaAbierta.Entrada.split(':').map(Number);
-    const entradaMs = new Date(); entradaMs.setHours(hh, mm, 0, 0);
-
-    // Minutos desde entrada hasta salida para quedar a 0 en el mes
-    const dowHoy = new Date(todayStr + 'T12:00:00').getDay();
-    const comidaSalida = tieneComida(dowHoy, ausenciasMes.find(a => String(a.Fecha) === todayStr)) ? COMIDA : 0;
-    const minHastaQuedara0 = objHoy - balHastaAyer + comidaSalida;
-    const salidaCero = new Date(entradaMs.getTime() + minHastaQuedara0 * 60000);
-    const salidaCeroStr = String(salidaCero.getHours()).padStart(2,'0') + ':' + String(salidaCero.getMinutes()).padStart(2,'0');
-
-    // Hora para cumplir solo la jornada de hoy (sin compensar)
-    const salidaHoy = new Date(entradaMs.getTime() + (objHoy + comidaSalida) * 60000);
-    const salidaHoyStr = String(salidaHoy.getHours()).padStart(2,'0') + ':' + String(salidaHoy.getMinutes()).padStart(2,'0');
-
-    horaSalidaEl.style.display = 'block';
-
-    const signo = balHastaAyer >= 0 ? '+' : '';
-    const colorSaldo = balHastaAyer >= 0 ? 'var(--green)' : 'var(--red)';
-    const saldoTxt = balHastaAyer !== 0
-      ? ` <span style="color:var(--muted);font-size:0.7rem">(saldo acumulado: <span style="color:${colorSaldo}">${signo}${minToHM(balHastaAyer)}</span>)</span>`
-      : '';
-
-    if (balTotal >= 0) {
-      horaSalidaEl.innerHTML = `<span style="color:var(--green)">▲ Vas <strong>+${minToHM(balTotal)}</strong> en el mes</span>${saldoTxt}
-        &nbsp;·&nbsp; Sal a las <strong style="color:var(--accent)">${salidaCeroStr}</strong> para quedar a 0
-        &nbsp;·&nbsp; <span style="color:var(--muted)">Solo hoy: <strong style="color:var(--text)">${salidaHoyStr}</strong></span>`;
-    } else {
-      horaSalidaEl.innerHTML = `<span style="color:var(--red)">▼ Debes <strong>${minToHM(Math.abs(balTotal))}</strong> en el mes</span>${saldoTxt}
-        &nbsp;·&nbsp; Sal a las <strong style="color:var(--accent)">${salidaCeroStr}</strong> para quedar a 0
-        &nbsp;·&nbsp; <span style="color:var(--muted)">Solo hoy: <strong style="color:var(--text)">${salidaHoyStr}</strong></span>`;
-    }
-  } else {
-    horaSalidaEl.style.display = 'none';
-  }
-
-  // ── 6. BARRAS POR DÍA ────────────────────────────────────────
-  const cont = document.getElementById('semanaDias');
-  cont.innerHTML = semDias.map(d => {
-    const pctDia   = d.objDia > 0 ? Math.min(100, Math.round(d.trabajadosReal / d.objDia * 100)) : 0;
-    // Comida solo Lun-Jue en oficina (dow 1-4, no TT, no festivo)
-    const dowBar = new Date(d.fecha + 'T12:00:00').getDay();
-    const hayComida = tieneComida(dowBar, d.ausencia) && !d.esFuturo && (d.tieneFichaje || d.esHoy);
-    const pctComida = hayComida ? Math.round(COMIDA / (d.objDia + COMIDA) * 100) : 0;
-    const pctBarra = Math.round(pctDia * (100 - pctComida) / 100);
-
-    let cls = 'vacio';
-    if (!d.esFuturo) {
-      if (d.esFestivo)                        cls = 'ausencia';
-      else if (d.esVacBaja)                   cls = 'ausencia';
-      else if (d.esTT)                        cls = pctDia >= 100 ? 'completo' : 'parcial';
-      else if (pctDia >= 100)                 cls = 'completo';
-      else if (d.tieneFichaje || d.esHoy)     cls = d.esHoy ? 'hoy' : 'parcial';
-    }
-
-    // Etiqueta balance del día
-    let balLabel = '<span style="color:var(--muted)">—</span>';
-    if (!d.esFuturo && d.balDia !== null) {
-      const c = d.balDia >= 0 ? 'var(--green)' : 'var(--red)';
-      const s = d.balDia >= 0 ? '+' : '';
-      balLabel = `<span style="color:${c}">${s}${minToHM(d.balDia)}</span>`;
-    }
-
-    return `<div class="semana-dia ${d.esHoy ? 'es-hoy' : ''}">
-      <div class="semana-dia-nombre">${d.nombre}</div>
-      <div class="semana-dia-bar-wrap">
-        ${pctComida > 0 ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${pctComida}%;background:rgba(96,165,250,0.35);border-radius:2px;border-top:1px dashed rgba(96,165,250,0.7);" title="1h comida"></div>` : ''}
-        <div class="semana-dia-bar-fill ${cls}" style="height:${pctBarra}%;bottom:${pctComida}%"></div>
-      </div>
-      <div class="semana-dia-horas">${balLabel}</div>
-    </div>`;
-  }).join('');
-}
-
-
-function renderMesStats() {
-  if (!resumenMes) return;
-  document.getElementById('mesResHoras').textContent    = minToHM(resumenMes.totalTrabajados);
-  document.getElementById('mesResEsperadas').textContent = minToHM(resumenMes.totalEsperados);
-  const bal = resumenMes.balanceTotal;
-  const el = document.getElementById('mesResBalance');
-  el.textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
-  el.className = 'stat-value ' + (bal >= 0 ? 'positive' : 'negative');
-
-  const dias = resumenMes.dias || [];
-  document.getElementById('mesTotal').textContent = minToHM(resumenMes.totalTrabajados);
-  document.getElementById('mesBalance').textContent = (bal >= 0 ? '+' : '') + minToHM(bal);
-  document.getElementById('diasTrabajados').textContent = dias.filter(d => d.fichajes.length > 0 || (d.ausencia && (d.ausencia.Tipo === 'vacaciones' || d.ausencia.Tipo === 'baja' || d.ausencia.Tipo === 'teletrabajo' || d.ausencia.Tipo === 'fuera'))).length;
-  document.getElementById('diasMes').textContent = dias.length + ' días laborables';
+  document.getElementById('semanaTotal').textContent   = minToHM(semTrabajados);
+  const semBal = semTrabajados - semEsperados;
+  const semBalEl = document.getElementById('semanaBalance');
+  semBalEl.textContent = (semBal >= 0 ? '+' : '') + minToHM(semBal);
+  semBalEl.className = 'stat-sub ' + (semBal >= 0 ? 'positive' : 'negative');
 }
 
 function renderCalendario() {
@@ -1661,11 +1083,18 @@ function renderCalendario() {
     else if (d?.ausencia)                   cls += ' has-ausencia';
     else if (d?.fichajes?.length)           cls += ' has-fichaje';
 
-    grid.innerHTML += `<div class="${cls}" onclick="clickDia('${fStr}')">
+    grid.innerHTML += `
+      <div class="${cls}" onclick="clickDia('${fStr}')">
         <span>${i}</span>
         ${(d || isToday) && !isWeekend ? '<div class="dot"></div>' : ''}
       </div>`;
   }
+}
+
+function clickDia(fecha) {
+  const dow = new Date(fecha + 'T12:00:00').getDay();
+  if (dow === 0 || dow === 6) return;
+  openAusenciaModal(fecha);
 }
 
 function renderMesTable() {
@@ -1678,25 +1107,20 @@ function renderMesTable() {
     const bal = d.balance;
     const balStr = (bal >= 0 ? '+' : '') + minToHM(bal);
     const balCls = bal > 0 ? 'positive' : bal < 0 ? 'negative' : '';
+    const ausLabel = d.ausencia ? tipoLabel(d.ausencia.Tipo) : '';
+    const hasFich  = d.fichajes.length > 0;
     let estado = '';
     if (d.ausencia?.Tipo === 'vacaciones' || d.ausencia?.Tipo === 'baja') {
       estado = `<span class="badge badge-blue">${tipoLabel(d.ausencia.Tipo)}</span>`;
     } else if (d.ausencia) {
       estado = `<span class="badge badge-yellow">${tipoLabel(d.ausencia.Tipo)}</span>`;
-    } else if (d.fichajes.length && d.trabajados >= d.esperados) {
+    } else if (hasFich && d.trabajados >= d.esperados) {
       estado = `<span class="badge badge-green">OK</span>`;
-    } else if (d.fichajes.length) {
+    } else if (hasFich) {
       estado = `<span class="badge badge-red">Incompleto</span>`;
     } else {
       estado = `<span class="badge badge-muted">Sin datos</span>`;
     }
-    const dow = d.diaSemana;
-    const esFinSemana = dow === 0 || dow === 6;
-    const acciones = !esFinSemana ? `
-      <td style="white-space:nowrap;">
-        <button class="btn btn-ghost btn-sm" onclick="openEditDiaModal('${d.fecha}')" title="Editar fichajes">✏️</button>
-        <button class="btn btn-ghost btn-sm" onclick="openAusenciaModal('${d.fecha}')" title="Marcar ausencia">📋</button>
-      </td>` : '<td></td>';
     return `<tr>
       <td>${d.fecha}</td>
       <td>${DIAS[d.diaSemana]}</td>
@@ -1704,11 +1128,9 @@ function renderMesTable() {
       <td>${minToHM(d.trabajados)}</td>
       <td class="${balCls}">${balStr}</td>
       <td>${estado}</td>
-      ${acciones}
     </tr>`;
   }).join('');
 }
-
 
 function cambiarMes(delta) {
   const [y, m] = currentMes.split('-').map(Number);
@@ -1722,7 +1144,7 @@ async function loadAusencias() {
   if (!CFG.url) return;
   try {
     const res = await api({ action: 'getAusencias', mes: currentMes });
-    ausenciasMes = (res.ausencias || []).map(a => ({ ...a, Fecha: String(a.Fecha) }));
+    ausenciasMes = res.ausencias || [];
     renderAusenciasTable();
   } catch(e) { toast(e.message, true); }
 }
@@ -1753,13 +1175,12 @@ function tipoLabel(tipo) {
     vacaciones: '🌴 Vacaciones',
     baja: '🏥 Baja',
     parcial: '⏱ Parcial',
-    festivo: '🎉 Festivo',
     otro: '📋 Otro'
   };
   return map[tipo] || tipo;
 }
 
-// selectedTipo declarado arriba
+let selectedTipo = '';
 function openAusenciaModal(fecha = null) {
   document.getElementById('ausenciaFecha').value = fecha || today();
   document.getElementById('ausenciaNota').value  = '';
@@ -1833,7 +1254,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 
 // ── TOAST ────────────────────────────────────────────────────
-var toastTimer;
+let toastTimer;
 function toast(msg, error = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
