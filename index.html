@@ -595,7 +595,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
     <div class="clock" id="clock">--:--:--</div>
-    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;">v2.1.9</div>
+    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;">v2.2.0</div>
   </div>
 </header>
 
@@ -970,6 +970,8 @@ function tickClock() {
     String(now.getMinutes()).padStart(2,'0') + ':' +
     String(now.getSeconds()).padStart(2,'0');
   updateLiveTrabajado();
+  // Actualizar widget semanal cada 30 segundos
+  if (now.getSeconds() % 30 === 0 && resumenMes) renderSemanaStats();
 }
 setInterval(tickClock, 1000);
 tickClock();
